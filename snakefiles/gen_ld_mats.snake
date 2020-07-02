@@ -8,21 +8,38 @@ import pandas as pd
 import allel
 import sys
 sys.path.append('../src/')
-# NOTE:  here is where we should import from src
+# NOTE:  here is where we should import from src the functions we want
 
 
 # ------- Data Directories ------ # 
+DATA_DIR  = '/project2/jnovembre/data/external_public/geo_LD/'
 VCF_1KG_DIR = '/project2/jnovembre/data/external_public/1kg_phase3/haps/'
 
 
 # ------ Rules ------ # 
 
-# TODO : how to do the splitting of the chromosome 
+rule filt_biallelic_AC_1kg:
+    """
+       Filter to biallelic SNPs in the 1000 Genomes Dataset (with a particular
+       allele count filter)
+    """
+    input:
+       vcf =  VCF_1KG_DIR + 'ALL.chr{CHROM}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz'
+    output:
+       vcf = DATA_DIR  +
+       'ALL.chr{CHROM}.phase3_shapeit2_mvncall_integrated.20130502.biallelic_snps.ac{AC,\d+}.genotypes.vcf.gz', 
+       vcf_idx = DATA_DIR  +
+       'ALL.chr{CHROM}.phase3_shapeit2_mvncall_integrated.20130502.biallelic_snps.ac{AC,\d+}.genotypes.vcf.gz.tbi' 
+    shell:
+        """
+        bcftools view -v snps -m2 -M2 -c {wildcards.AC}:minor {input.vcf} | bgzip -@4 > {output.vcf}    
+        tabix -f {output.vcf}
+        """
+
 
 # rule gen_LD_single_pop_chrom:
     # input:
-        # VCF_1KG_DIR +
-        # 'ALL.chr{CHROM}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz'
+        # vcf = rules.filt_biallelic_AC_1kg.output.vcf
     # output:
         # 'data/ld_mats/chr{CHROM}_AC_pop{POP}.npz'
 
