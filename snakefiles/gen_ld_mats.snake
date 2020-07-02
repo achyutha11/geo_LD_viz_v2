@@ -1,0 +1,29 @@
+#!python
+
+"""
+    Functions and algorithms to generate 
+"""
+import numpy as np 
+import pandas as pd
+import allel
+import sys
+sys.path.append('../src/')
+# NOTE:  here is where we should import from src
+
+
+# ------- Data Directories ------ # 
+VCF_1KG_DIR = '/project2/jnovembre/data/external_public/1kg_phase3/haps/'
+
+
+# ------ Rules ------ # 
+
+# TODO : how to do the splitting of the chromosome 
+
+# rule gen_LD_single_pop_chrom:
+    # input:
+        # VCF_1KG_DIR +
+        # 'ALL.chr{CHROM}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz'
+    # output:
+        # 'data/ld_mats/chr{CHROM}_AC_pop{POP}.npz'
+
+

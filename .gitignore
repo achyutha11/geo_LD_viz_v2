@@ -1,0 +1,8 @@
+*.err
+*.out
+cartopy/*
+.ipynb_checkpoints/*
+scratch/*
+data/*
+*.ld.gz
+sandbox/
