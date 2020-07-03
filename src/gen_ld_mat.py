@@ -45,4 +45,13 @@ X = X.astype(np.float32)
 X[X<0] = np.nan
 
 #Function to compute KxP matrix
-def est_kxp_mat(gt_mat,pop_vec,pop,K)
+def est_kxp_mat(gt_mat,pop_vec,pop,K):
+    P,N = gt_mat.shape
+    assert(pop_vec.size==N)
+    kxp_ld_mat = np.zeros(shape=(K,P),dtype=np.float32)
+    gt_pop_filt=gt_mat[:,(pop_vec==pop)]
+    for i in tqdm(range(P)):
+        cur_corr = np.ma.corrcoef(gt_pop_filt[i,:],gt_pop_filt[i:(i+K),:])[0,:-1]
+        kxp_ld_mat[:cur_corr.shape[0],i] = cur_corr
+    kxp_ld_mat = kxp_ld_mat**2
+    return kxp_ld_mat
