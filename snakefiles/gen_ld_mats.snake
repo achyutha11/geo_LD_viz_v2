@@ -37,10 +37,11 @@ rule filt_biallelic_AC_1kg:
         """
 
 
-# rule gen_LD_single_pop_chrom:
-    # input:
-        # vcf = rules.filt_biallelic_AC_1kg.output.vcf
-    # output:
-        # 'data/ld_mats/chr{CHROM}_AC_pop{POP}.npz'
-
-
+rule gen_LD_single_pop_chrom:
+    input:
+        vcf = rules.filt_biallelic_AC_1kg.output.vcf
+    output:
+        'data/ld_mats/chr{CHROM}_AC_pop{POP}.npz'
+    script:
+        '../src/gen_ld_mat.py'
+        
