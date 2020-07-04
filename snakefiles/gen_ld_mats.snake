@@ -5,15 +5,16 @@
 """
 import numpy as np 
 import pandas as pd
+from tqdm import tqdm
 import allel
 import sys
-sys.path.append('../src/')
-# NOTE:  here is where we should import from src the functions we want
-
+sys.path.append('src/')
+from gen_ld_mat import est_kxp_mat
 
 # ------- Data Directories ------ # 
 DATA_DIR  = '/project2/jnovembre/data/external_public/geo_LD/'
 VCF_1KG_DIR = '/project2/jnovembre/data/external_public/1kg_phase3/haps/'
+
 
 
 # ------ Rules ------ # 
@@ -36,12 +37,43 @@ rule filt_biallelic_AC_1kg:
         tabix -f {output.vcf}
         """
 
-
 rule gen_LD_single_pop_chrom:
+    """
+        Generate a K x P matrix of r^2 values for a single chromosome
+    """
     input:
-        vcf = rules.filt_biallelic_AC_1kg.output.vcf
+        vcf = rules.filt_biallelic_AC_1kg.output.vcf,
+        popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
     output:
-        'data/ld_mats/chr{CHROM}_AC_pop{POP}.npz'
-    script:
-        '../src/gen_ld_mat.py'
-        
+        ld_mat = 'data/ld_mats/chr{CHROM}_ac{AC,\d+}_K{K,\d+}_pop{POP}.npz'
+    run:
+       pop_df = pd.read_csv(input.popfile, sep='\t')
+       print(pop_df.head())
+       pop_vec = pop_df['pop'].values
+
+       vcf_data = allel.read_vcf(input.vcf, fields=['variants/CHROM','variants/POS','calldata/GT'])
+       chroms = vcf_data['variants/CHROM']
+       positions = vcf_data['variants/POS']
+       gt = vcf_data['calldata/GT']
+       # Sum up the genotpes & converting to floats
+       raw_gt = gt[:,:,0] + gt[:,:,1]
+       raw_gt = raw_gt.astype(np.float32)
+       raw_gt[raw_gt < 0] = np.nan
+       # Running the LD estimation from KxP
+       ld_mat = est_kxp_mat(raw_gt, pop_vec, wildcards.POP, int(wildcards.K))
+       # Saving the compressed data  
+       np.savez_compressed(output.ld_mat, chrom=chroms, positions=positions, ld_mat = ld_mat)
+
+
+# TODO : we should generate a version that computes the binning?
+
+rule gen_multipop_r2_matrices:
+    input:
+        expand('data/ld_mats/chr{CHROM}_ac{AC}_K{K}_pop{POP}.npz', AC=5, POP=['CEU'], K=[200], CHROM=22)
+
+
+
+
+
+
+       
