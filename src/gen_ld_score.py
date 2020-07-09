@@ -1,4 +1,8 @@
-#First attempt at a function to return array of LD scores
+#!python 
+
+"""
+    Functions to return an array of LD scores for each SNP from a K x P LD matrix 
+"""
 
 from tqdm import tqdm
 
