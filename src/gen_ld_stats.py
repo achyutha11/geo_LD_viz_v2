@@ -5,6 +5,7 @@
 """
 
 from tqdm import tqdm
+import numpy as np
 
 # First attempt to create LD score function
 
@@ -26,9 +27,6 @@ def ld_score(LDmat):
     return scores
 
 # Second attempt to create LD score function
-
-from tqdm import tqdm
-import numpy as np
 
 def ld_score_v2(LDmat):
     # Creating empty array to be filled with LD scores, length = number of SNPs
