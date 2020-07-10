@@ -19,7 +19,6 @@ VCF_1KG_DIR = '/project2/jnovembre/data/external_public/1kg_phase3/haps/'
 # ------ Global Variables ------ # 
 TOT_N = 10
 
-
 # ------ Rules ------ # 
 rule filt_biallelic_AC_1kg:
     """
@@ -61,6 +60,13 @@ rule gen_LD_single_pop_chrom:
       np.savez_compressed(output.ld_mat, chrom=chroms, positions=positions, alt_af = alt_af, ld_mat = ld_mat)
 
 
+rule gen_multipop_r2_matrices:
+    input:
+      expand('data/ld_mats/chr{CHROM}_ac{AC}_K{K}_pop{POP}.npz', AC=5, POP=['CEU'], K=[200], CHROM=22)
+
+      
+      
+      
 rule split_kxp_per_chrom:
   """
     Split the data into TOT_N chunks for easier parallelization
@@ -69,13 +75,13 @@ rule split_kxp_per_chrom:
     vcf = rules.filt_biallelic_AC_1kg.output.vcf,
     popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
   output:
-    ld_mat_split = 'data/ld_mats/chr{CHROM,\d+}_ac{AC,\d+}_K{K,\d+}_{poplist}_{POP}_split_{N,\d+}.npz'
+    ld_mat_split = 'data/ld_mats/chr{CHROM,\d+}/filt_ac{AC,\d+}_K{K,\d+}_{poplist}_{POP}_split_{N,\d+}.npz'
   wildcard_constraints:
     poplist='(pop|superpop)'
   run:
       # Reading in the population file
       pop_df = pd.read_csv(input.popfile, sep='\t')
-      if wildcards.poplist == superpop:
+      if wildcards.poplist == 'superpop':
         pop_vec = pop_df['superpop'].values
       else:
         pop_vec = pop_df['pop'].values
@@ -98,28 +104,24 @@ rule split_kxp_per_chrom:
       raw_gt[raw_gt < 0] = np.nan
       
       # Running the LD estimation from KxP for all snps in the segment
-      # NOTE : this function should return the AF in the population as well... 
-      ld_mat_split, alt_af = est_kxp_mat_split(raw_gt, pop_vec, wildcards.POP, k)
-      if n != TOT_N - 1:
+      ld_mat_split, alt_af = est_kxp_mat(raw_gt, pop_vec, wildcards.POP, k)
+      
+      if n != (TOT_N - 1):
         ld_mat_split = ld_mat_split[:,:-k]
         alt_af = alt_af[:-k]
-      # Saving the compressed data  
-      np.savez_compressed(output.ld_mat, chrom=chroms[split_idx_cur], positions=positions[split_idx_cur], alt_af=alt_af ld_mat_split=ld_mat_split)
+      np.savez_compressed(output.ld_mat_split, chrom=chroms[split_idx_cur], positions=positions[split_idx_cur], alt_af=alt_af, ld_mat_split=ld_mat_split)
 
-rule test:
-  input:
-    expand('data/ld_mats/chr{CHROM}_ac{AC}_K{K}_{poplist}_{POP}_split_{N}.npz', CHROM=22, AC=5, K=[200,500], poplist='pop', POP='CEU', N=[0,5])
+
     
-
 
 rule collapse_kxp_mats:
   """
     Collapsing the KxP matrices via np.hstack
   """
   input:
-    input_split_data = expand('data/ld_mats/chr{{CHROM}}_ac{{AC}}_K{{K}}_{{poplist}}_{{POP}}_split_{N}.npz', N = np.arange(TOT_N))
+    input_split_data = expand('data/ld_mats/chr{{CHROM}}/filt_ac{{AC}}_K{{K}}_{{poplist}}_{{POP}}_split_{N}.npz', N = np.arange(TOT_N))
   output:
-    'data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz'
+    ld_mat = 'data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz'
   run:
     # Generate a set of collections 
     tot_kxp_mat = []
@@ -134,18 +136,49 @@ rule collapse_kxp_mats:
       tot_pos.append(x['positions'])
       tot_alt_af.append(x['alt_af'])
     # hstack everything now
+    tot_kxp_true = np.hstack(tot_kxp_mat)
+    tot_chrom_true = np.hstack(tot_chroms)
+    tot_pos_true = np.hstack(tot_pos)
+    tot_alt_af_true = np.hstack(tot_alt_af)
+    # Save the compressed version of these plots here 
+    np.savez_compressed(output.ld_mat, chrom=tot_chrom_true, positions=tot_pos_true, alt_af=tot_alt_af_true, ld_mat = tot_kxp_true)
+    # Delete the initial files before we collapse them ... 
+    for i in input.input_split_data:
+      shell('rm -f %s' % i)
+
+
+rule split_collapsed_ld_mats:
+  input:
+    expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz'
+, CHROM=22, AC=5, K=[200,500], poplist='pop', POP=['CEU','YRI','CHB'])
     
 
 
-
-
-
-
-
-
-rule gen_multipop_r2_matrices:
+BINNING_DICT = {'linear' : np.linspace(0,1,255), 'log' : np.insert(np.logspace(-3,0,254), 0,0)}    
+  
+rule binning_ld_values_8bit:
     input:
-        expand('data/ld_mats/chr{CHROM}_ac{AC}_K{K}_pop{POP}.npz', AC=5, POP=['CEU'], K=[200], CHROM=22)
+      ld_non_collapsed = rules.collapse_kxp_mats.output.ld_mat
+    output:
+      ld_mat_binned = 'data/ld_mats/chr{CHROM, \d+}/filt_ac{AC,\d+}_K{K, \d+}_{poplist}_{POP}_binning{bins}.npz'
+    wildcard_constraints:
+      poplist='(pop|superpop)',
+      bins='(log|linear)'
+    run:
+      x = np.load(input.ld_non_collapsed, allow_pickle=True)
+      bins = BINNING_DICT[wildcards.bins]
+      ld_mat = x['ld_mat']
+      # NOTE : we might have to play this 
+      ld_mat_binned = np.digitize(ld_mat, right=True)
+      ld_mat_binned = ld_mat_binned.astype(np.uint8)
+      np.savez_compressed(output.ld_mat_binned, chrom=x['chrom'], positions=x['positions'], alt_af=x['alt_af'], ld_mat = ld_mat_binned)
+      
+
+rule test:
+  input:
+    expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz'
+, CHROM=22, AC=5, K=[200,500], poplist='pop', POP=['CEU','YRI','CHB'])  
+
 
 
 
