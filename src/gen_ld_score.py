@@ -6,6 +6,8 @@
 
 from tqdm import tqdm
 
+# First attempt to create LD score function
+
 def ld_score(LDmat):
     # Creating empty array to be filled with LD scores, length = number of SNPs
     scores = np.zeros(LDmat.shape[1])
@@ -21,4 +23,24 @@ def ld_score(LDmat):
             row += 1
         # Adds sum of column to sum of diagonal
         scores[i]=np.sum(LDmat[:,i]) + diag
+    return scores
+
+# Second attempt to create LD score function
+
+from tqdm import tqdm
+import numpy as np
+
+def ld_score_v2(LDmat):
+    # Creating empty array to be filled with LD scores, length = number of SNPs
+    scores = np.zeros(LDmat.shape[1])
+    # Iterating through each column of K x P matrix
+    for i in tqdm(range(LDmat.shape[1])):        
+        localmat = LDmat[:,:i+1]
+        # Taking sum of reverse diagonal of matrix
+        flpdiag = np.fliplr(localmat).diagonal()
+        diag = np.sum(flpdiag)
+        # Calculating sum of ith column values
+        col = np.sum(LDmat[:,i])
+        # Adding column and diagonal sums
+        scores[i] = col + diag - LDmat[0,i]
     return scores
