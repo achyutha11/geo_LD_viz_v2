@@ -22,7 +22,7 @@ def est_kxp_mat(gt_mat, pop_vec, pop, K=500):
     gt_pop_filt=gt_mat[:,(pop_vec==pop)]
     
     # Calculating the alternative allele frequency
-    alt_ac = np.nansum(gt_pop_filt, axis=0)
+    alt_ac = np.nansum(gt_pop_filt, axis=1)
     alt_af = alt_ac / (2*gt_pop_filt.shape[1])
     
     for i in tqdm(range(P)):

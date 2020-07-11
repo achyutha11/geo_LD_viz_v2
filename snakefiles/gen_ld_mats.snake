@@ -65,8 +65,6 @@ rule gen_multipop_r2_matrices:
       expand('data/ld_mats/chr{CHROM}_ac{AC}_K{K}_pop{POP}.npz', AC=5, POP=['CEU'], K=[200], CHROM=22)
 
       
-      
-      
 rule split_kxp_per_chrom:
   """
     Split the data into TOT_N chunks for easier parallelization
@@ -82,7 +80,7 @@ rule split_kxp_per_chrom:
       # Reading in the population file
       pop_df = pd.read_csv(input.popfile, sep='\t')
       if wildcards.poplist == 'superpop':
-        pop_vec = pop_df['superpop'].values
+        pop_vec = pop_df['super_pop'].values
       else:
         pop_vec = pop_df['pop'].values
       
@@ -105,15 +103,24 @@ rule split_kxp_per_chrom:
       
       # Running the LD estimation from KxP for all snps in the segment
       ld_mat_split, alt_af = est_kxp_mat(raw_gt, pop_vec, wildcards.POP, k)
-      
       if n != (TOT_N - 1):
-        ld_mat_split = ld_mat_split[:,:-k]
-        alt_af = alt_af[:-k]
-      np.savez_compressed(output.ld_mat_split, chrom=chroms[split_idx_cur], positions=positions[split_idx_cur], alt_af=alt_af, ld_mat_split=ld_mat_split)
-
+        ld_mat_split = ld_mat_split[:,:-(k-1)]
+        alt_af = alt_af[:-(k-1)]
+        
+      split_pos = positions[split_idx_cur]
+      split_chroms = chroms[split_idx_cur]
+      # Check that the positions match up with this here to avoid mismatching down the line ...       
+      assert(split_pos.size == ld_mat_split.shape[1])
+      assert(split_pos.size == alt_af.size)
+      np.savez_compressed(output.ld_mat_split, 
+                          chrom=split_chroms, 
+                          positions=split_pos, 
+                          alt_af=alt_af, 
+                          ld_mat_split=ld_mat_split)
 
     
-
+    
+    
 rule collapse_kxp_mats:
   """
     Collapsing the KxP matrices via np.hstack
@@ -135,22 +142,59 @@ rule collapse_kxp_mats:
       tot_chroms.append(x['chrom'])
       tot_pos.append(x['positions'])
       tot_alt_af.append(x['alt_af'])
-    # hstack everything now
+    # hstack everything now to make sure we have the correct appending 
     tot_kxp_true = np.hstack(tot_kxp_mat)
     tot_chrom_true = np.hstack(tot_chroms)
     tot_pos_true = np.hstack(tot_pos)
     tot_alt_af_true = np.hstack(tot_alt_af)
+    
+    # Make sure that the dimensions match up nicely ...
+    assert(tot_alt_af_true.size == tot_pos_true.size)
+    assert(tot_alt_af_true.size == tot_kxp_true.shape[1])
     # Save the compressed version of these plots here 
     np.savez_compressed(output.ld_mat, chrom=tot_chrom_true, positions=tot_pos_true, alt_af=tot_alt_af_true, ld_mat = tot_kxp_true)
     # Delete the initial files before we collapse them ... 
     for i in input.input_split_data:
       shell('rm -f %s' % i)
 
+rule test:
+  input:
+    expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz', CHROM=22, AC=5, K=[200], poplist='pop', POP=['CEU', 'YRI','CHB']),
+    expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz', CHROM=22, AC=5, K=[200], poplist='superpop', POP=['EUR', 'EAS','AFR'])
+    
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+pops_total = ['GWD', 'CLM', 'BEB', 'PEL', 'LWK', 'MSL',
+              'GBR', 'IBS', 'ASW', 'FIN', 'TSI', 'KHV',
+              'CEU', 'YRI', 'CHB', 'STU', 'CHS', 'ESN',
+              'ACB', 'GIH', 'PJL', 'MXL', 'ITU', 'CDX', 'JPT', 'PUR']
 
 rule split_collapsed_ld_mats:
   input:
     expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz'
-, CHROM=22, AC=5, K=[200,500], poplist='pop', POP=['CEU','YRI','CHB'])
+, CHROM=22, AC=5, K=[200], poplist='pop', POP=pops_total)
     
 
 
@@ -172,17 +216,4 @@ rule binning_ld_values_8bit:
       ld_mat_binned = np.digitize(ld_mat, right=True)
       ld_mat_binned = ld_mat_binned.astype(np.uint8)
       np.savez_compressed(output.ld_mat_binned, chrom=x['chrom'], positions=x['positions'], alt_af=x['alt_af'], ld_mat = ld_mat_binned)
-      
-
-rule test:
-  input:
-    expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz'
-, CHROM=22, AC=5, K=[200,500], poplist='pop', POP=['CEU','YRI','CHB'])  
-
-
-
-
-
-
-
-       
+             
