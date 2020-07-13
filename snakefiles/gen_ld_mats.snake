@@ -19,6 +19,14 @@ VCF_1KG_DIR = '/project2/jnovembre/data/external_public/1kg_phase3/haps/'
 # ------ Global Variables ------ # 
 TOT_N = 10
 
+pops_total = ['GWD', 'CLM', 'BEB', 'PEL', 'LWK', 'MSL',
+              'GBR', 'IBS', 'ASW', 'FIN', 'TSI', 'KHV',
+              'CEU', 'YRI', 'CHB', 'STU', 'CHS', 'ESN',
+              'ACB', 'GIH', 'PJL', 'MXL', 'ITU', 'CDX', 'JPT', 'PUR']
+
+superpop_total = ['AFR','EUR','SAS','EAS','AMR']
+
+
 # ------ Rules ------ # 
 rule filt_biallelic_AC_1kg:
     """
@@ -118,9 +126,8 @@ rule split_kxp_per_chrom:
                           alt_af=alt_af, 
                           ld_mat_split=ld_mat_split)
 
-    
-    
-    
+
+
 rule collapse_kxp_mats:
   """
     Collapsing the KxP matrices via np.hstack
@@ -157,45 +164,13 @@ rule collapse_kxp_mats:
     for i in input.input_split_data:
       shell('rm -f %s' % i)
 
-rule test:
-  input:
-    expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz', CHROM=22, AC=5, K=[200], poplist='pop', POP=['CEU', 'YRI','CHB']),
-    expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz', CHROM=22, AC=5, K=[200], poplist='superpop', POP=['EUR', 'EAS','AFR'])
-    
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-pops_total = ['GWD', 'CLM', 'BEB', 'PEL', 'LWK', 'MSL',
-              'GBR', 'IBS', 'ASW', 'FIN', 'TSI', 'KHV',
-              'CEU', 'YRI', 'CHB', 'STU', 'CHS', 'ESN',
-              'ACB', 'GIH', 'PJL', 'MXL', 'ITU', 'CDX', 'JPT', 'PUR']
-
 rule split_collapsed_ld_mats:
   input:
     expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz'
-, CHROM=22, AC=5, K=[200], poplist='pop', POP=pops_total)
-    
+, CHROM=22, AC=5, K=[200], poplist='pop', POP=pop_total),
+    expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz'
+, CHROM=22, AC=5, K=[200], poplist='superpop', POP=superpop_total)
+       
 
 
 BINNING_DICT = {'linear' : np.linspace(0,1,255), 'log' : np.insert(np.logspace(-3,0,254), 0,0)}    
