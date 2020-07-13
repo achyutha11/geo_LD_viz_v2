@@ -16,91 +16,204 @@ DATA_DIR  = '/project2/jnovembre/data/external_public/geo_LD/'
 VCF_1KG_DIR = '/project2/jnovembre/data/external_public/1kg_phase3/haps/'
 
 
+# ------ Global Variables ------ # 
+TOT_N = 10
 
 # ------ Rules ------ # 
-
 rule filt_biallelic_AC_1kg:
     """
        Filter to biallelic SNPs in the 1000 Genomes Dataset (with a particular
        allele count filter)
     """
     input:
-       vcf =  VCF_1KG_DIR + 'ALL.chr{CHROM}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz'
+      vcf =  VCF_1KG_DIR + 'ALL.chr{CHROM}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz'
     output:
-       vcf = DATA_DIR  +
-       'ALL.chr{CHROM}.phase3_shapeit2_mvncall_integrated.20130502.biallelic_snps.ac{AC,\d+}.genotypes.vcf.gz', 
-       vcf_idx = DATA_DIR  +
-       'ALL.chr{CHROM}.phase3_shapeit2_mvncall_integrated.20130502.biallelic_snps.ac{AC,\d+}.genotypes.vcf.gz.tbi' 
+      vcf = DATA_DIR  + 'ALL.chr{CHROM}.phase3_shapeit2_mvncall_integrated.20130502.biallelic_snps.ac{AC,\d+}.genotypes.vcf.gz',
+      vcf_idx = DATA_DIR  + 'ALL.chr{CHROM}.phase3_shapeit2_mvncall_integrated.20130502.biallelic_snps.ac{AC,\d+}.genotypes.vcf.gz.tbi' 
     shell:
-        """
-        bcftools view -v snps -m2 -M2 -c {wildcards.AC}:minor {input.vcf} | bgzip -@4 > {output.vcf}    
-        tabix -f {output.vcf}
-        """
+      """
+      bcftools view -v snps -m2 -M2 -c {wildcards.AC}:minor {input.vcf} | bgzip -@4 > {output.vcf}    
+      tabix -f {output.vcf}
+      """
 
 rule gen_LD_single_pop_chrom:
     """
         Generate a K x P matrix of r^2 values for a single chromosome
     """
     input:
-        vcf = rules.filt_biallelic_AC_1kg.output.vcf,
-        popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
+      vcf = rules.filt_biallelic_AC_1kg.output.vcf,
+      popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
     output:
-        ld_mat = 'data/ld_mats/chr{CHROM}_ac{AC,\d+}_K{K,\d+}_pop{POP}.npz'
+      ld_mat = 'data/ld_mats/chr{CHROM}_ac{AC,\d+}_K{K,\d+}_pop{POP}.npz'
     run:
-       pop_df = pd.read_csv(input.popfile, sep='\t')
-       print(pop_df.head())
-       pop_vec = pop_df['pop'].values
+      pop_df = pd.read_csv(input.popfile, sep='\t')
+      pop_vec = pop_df['pop'].values
+      vcf_data = allel.read_vcf(input.vcf, fields=['variants/CHROM','variants/POS','calldata/GT'])
+      chroms = vcf_data['variants/CHROM']
+      positions = vcf_data['variants/POS']
+      gt = vcf_data['calldata/GT']
+      raw_gt = gt[:,:,0] + gt[:,:,1]
+      raw_gt = raw_gt.astype(np.float32)
+      raw_gt[raw_gt < 0] = np.nan
+      ld_mat, alt_af = est_kxp_mat(raw_gt, pop_vec, wildcards.POP, int(wildcards.K))
+      # Saving the compressed data
+      np.savez_compressed(output.ld_mat, chrom=chroms, positions=positions, alt_af = alt_af, ld_mat = ld_mat)
 
-       vcf_data = allel.read_vcf(input.vcf, fields=['variants/CHROM','variants/POS','calldata/GT'])
-       chroms = vcf_data['variants/CHROM']
-       positions = vcf_data['variants/POS']
-       gt = vcf_data['calldata/GT']
-       # Sum up the genotpes & converting to floats
-       raw_gt = gt[:,:,0] + gt[:,:,1]
-       raw_gt = raw_gt.astype(np.float32)
-       raw_gt[raw_gt < 0] = np.nan
-       # Running the LD estimation from KxP
-       ld_mat = est_kxp_mat(raw_gt, pop_vec, wildcards.POP, int(wildcards.K))
-       # Saving the compressed data  
-       np.savez_compressed(output.ld_mat, chrom=chroms, positions=positions, ld_mat = ld_mat)
-
-
-# TODO : we should generate a version that computes the binning?
-
-#rule splitkxp:
-#    """
-#        Split the chromosome into X (non-overlapping) segments and generate a K x P matrix for each of these segments
-#    """
-#    input:
-#        vcf = rules.filt_biallelic_AC_1kg.output.vcf,
-#        popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
-#    output:
-#        ld_mat_split = 'data/ld_mats/chr{CHROM}_ac{AC,\d+}_K{K,\d+}_pop{POP}_split.npz'
-#    run:
-#       pop_df = pd.read_csv(input.popfile, sep='\t')
-#       print(pop_df.head())
-#       pop_vec = pop_df['pop'].values
-
-#       vcf_data = allel.read_vcf(input.vcf, fields=['variants/CHROM','variants/POS','calldata/GT'])
-#       chroms = vcf_data['variants/CHROM']
-#       positions = vcf_data['variants/POS']
-#       gt = vcf_data['calldata/GT']
-#       # Sum up the genotpes & converting to floats
-#       raw_gt = gt[:,:,0] + gt[:,:,1]
-#       raw_gt = raw_gt.astype(np.float32)
-#       raw_gt[raw_gt < 0] = np.nan
-#       # Running the LD estimation from KxP for each segment 
-#       ld_mat_split = est_kxp_mat_split(raw_gt, pop_vec, wildcards.POP, int(wildcards.K))
-#       # Saving the compressed data  
-#       np.savez_compressed(output.ld_mat, chrom=chroms, positions=positions, ld_mat_split = ld_mat_split)
 
 rule gen_multipop_r2_matrices:
     input:
-        expand('data/ld_mats/chr{CHROM}_ac{AC}_K{K}_pop{POP}.npz', AC=5, POP=['YRI'], K=[200], CHROM=22)
+      expand('data/ld_mats/chr{CHROM}_ac{AC}_K{K}_pop{POP}.npz', AC=5, POP=['CEU'], K=[200], CHROM=22)
+
+      
+rule split_kxp_per_chrom:
+  """
+    Split the data into TOT_N chunks for easier parallelization
+  """
+  input:
+    vcf = rules.filt_biallelic_AC_1kg.output.vcf,
+    popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
+  output:
+    ld_mat_split = 'data/ld_mats/chr{CHROM,\d+}/filt_ac{AC,\d+}_K{K,\d+}_{poplist}_{POP}_split_{N,\d+}.npz'
+  wildcard_constraints:
+    poplist='(pop|superpop)'
+  run:
+      # Reading in the population file
+      pop_df = pd.read_csv(input.popfile, sep='\t')
+      if wildcards.poplist == 'superpop':
+        pop_vec = pop_df['super_pop'].values
+      else:
+        pop_vec = pop_df['pop'].values
+      
+      vcf_data = allel.read_vcf(input.vcf, fields=['variants/CHROM','variants/POS','calldata/GT'])
+      chroms = vcf_data['variants/CHROM']
+      positions = vcf_data['variants/POS']
+      gt = vcf_data['calldata/GT']
+      n = int(wildcards.N)
+      k = int(wildcards.K)
+      # Do the filtering for shape here   
+      P,N,_ = gt.shape
+      split_idx = np.array_split(np.arange(P), TOT_N)
+      split_idx_cur = split_idx[n]
+      min_id, max_id = np.min(split_idx_cur), np.max(split_idx_cur)
+      gt = gt[min_id:(max_id+k),:,:]
+      # Sum up the genotpes & converting to floats
+      raw_gt = gt[:,:,0] + gt[:,:,1]
+      raw_gt = raw_gt.astype(np.float32)
+      raw_gt[raw_gt < 0] = np.nan
+      
+      # Running the LD estimation from KxP for all snps in the segment
+      ld_mat_split, alt_af = est_kxp_mat(raw_gt, pop_vec, wildcards.POP, k)
+      if n != (TOT_N - 1):
+        ld_mat_split = ld_mat_split[:,:-(k-1)]
+        alt_af = alt_af[:-(k-1)]
+        
+      split_pos = positions[split_idx_cur]
+      split_chroms = chroms[split_idx_cur]
+      # Check that the positions match up with this here to avoid mismatching down the line ...       
+      assert(split_pos.size == ld_mat_split.shape[1])
+      assert(split_pos.size == alt_af.size)
+      np.savez_compressed(output.ld_mat_split, 
+                          chrom=split_chroms, 
+                          positions=split_pos, 
+                          alt_af=alt_af, 
+                          ld_mat_split=ld_mat_split)
+
+    
+    
+    
+rule collapse_kxp_mats:
+  """
+    Collapsing the KxP matrices via np.hstack
+  """
+  input:
+    input_split_data = expand('data/ld_mats/chr{{CHROM}}/filt_ac{{AC}}_K{{K}}_{{poplist}}_{{POP}}_split_{N}.npz', N = np.arange(TOT_N))
+  output:
+    ld_mat = 'data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz'
+  run:
+    # Generate a set of collections 
+    tot_kxp_mat = []
+    tot_chroms = []
+    tot_pos = []
+    tot_alt_af = []
+    for f in input.input_split_data:
+      x = np.load(f, allow_pickle=True)
+      # Appending all of the things!
+      tot_kxp_mat.append(x['ld_mat_split'])
+      tot_chroms.append(x['chrom'])
+      tot_pos.append(x['positions'])
+      tot_alt_af.append(x['alt_af'])
+    # hstack everything now to make sure we have the correct appending 
+    tot_kxp_true = np.hstack(tot_kxp_mat)
+    tot_chrom_true = np.hstack(tot_chroms)
+    tot_pos_true = np.hstack(tot_pos)
+    tot_alt_af_true = np.hstack(tot_alt_af)
+    
+    # Make sure that the dimensions match up nicely ...
+    assert(tot_alt_af_true.size == tot_pos_true.size)
+    assert(tot_alt_af_true.size == tot_kxp_true.shape[1])
+    # Save the compressed version of these plots here 
+    np.savez_compressed(output.ld_mat, chrom=tot_chrom_true, positions=tot_pos_true, alt_af=tot_alt_af_true, ld_mat = tot_kxp_true)
+    # Delete the initial files before we collapse them ... 
+    for i in input.input_split_data:
+      shell('rm -f %s' % i)
+
+rule test:
+  input:
+    expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz', CHROM=22, AC=5, K=[200], poplist='pop', POP=['CEU', 'YRI','CHB']),
+    expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz', CHROM=22, AC=5, K=[200], poplist='superpop', POP=['EUR', 'EAS','AFR'])
+    
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+pops_total = ['GWD', 'CLM', 'BEB', 'PEL', 'LWK', 'MSL',
+              'GBR', 'IBS', 'ASW', 'FIN', 'TSI', 'KHV',
+              'CEU', 'YRI', 'CHB', 'STU', 'CHS', 'ESN',
+              'ACB', 'GIH', 'PJL', 'MXL', 'ITU', 'CDX', 'JPT', 'PUR']
+
+rule split_collapsed_ld_mats:
+  input:
+    expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz'
+, CHROM=22, AC=5, K=[200], poplist='pop', POP=pops_total)
+    
 
 
-
-
-
-
-       
+BINNING_DICT = {'linear' : np.linspace(0,1,255), 'log' : np.insert(np.logspace(-3,0,254), 0,0)}    
+  
+rule binning_ld_values_8bit:
+    input:
+      ld_non_collapsed = rules.collapse_kxp_mats.output.ld_mat
+    output:
+      ld_mat_binned = 'data/ld_mats/chr{CHROM, \d+}/filt_ac{AC,\d+}_K{K, \d+}_{poplist}_{POP}_binning{bins}.npz'
+    wildcard_constraints:
+      poplist='(pop|superpop)',
+      bins='(log|linear)'
+    run:
+      x = np.load(input.ld_non_collapsed, allow_pickle=True)
+      bins = BINNING_DICT[wildcards.bins]
+      ld_mat = x['ld_mat']
+      # NOTE : we might have to play this 
+      ld_mat_binned = np.digitize(ld_mat, right=True)
+      ld_mat_binned = ld_mat_binned.astype(np.uint8)
+      np.savez_compressed(output.ld_mat_binned, chrom=x['chrom'], positions=x['positions'], alt_af=x['alt_af'], ld_mat = ld_mat_binned)
+             
