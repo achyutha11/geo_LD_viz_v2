@@ -1,0 +1,53 @@
+#!python
+
+"""
+    Performance testing to find an acceptable K value
+"""
+
+import numpy as np 
+import pandas as pd
+import numcodecs
+import zarr
+from tqdm import tqdm
+import allel
+import sys
+sys.path.append('src/')
+from gen_ld_mat import est_kxp_mat
+
+# ------- Data Directories ------ # 
+DATA_DIR  = '/project2/jnovembre/data/external_public/geo_LD/'
+VCF_1KG_DIR = '/project2/jnovembre/data/external_public/1kg_phase3/haps/'
+
+# ------ Rules ------ # 
+#rule random_10MB_CEU:
+#    """
+#       Take random 10Mb segment of chromosome 22 for individuals from CEU from zarr file (converted from 1kGP vcf)
+#    """
+#    input:
+#      zarr =  VCF_1KG_DIR + 'ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.zarr'
+#    output:
+#      ld_mat = 'data/ld_mats/chr22_10MB_popCEU.npz'
+#      #vcf_idx = DATA_DIR  + 'ALL.chr{CHROM}.phase3_shapeit2_mvncall_integrated.20130502.10MB_CEU.genotypes.vcf.gz.tbi' 
+#    run:
+#      callset = zarr.open_group(input.zarr, mode='r')
+#      pos = allel.SortedIndex(callset['22/variants/POS'])
+#      loc_region = pos.locate_range(31000000, 41000000)
+#      gt_zarr = callset['22/calldata/GT']
+#      gt_region = allel.GenotypeArray(gt_zarr[loc_region])
+#      panel_path = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
+#      panel = pd.read_csv(panel_path, sep='\t', usecols=['sample', 'pop', 'super_pop'])
+#      samples = callset['22/samples'][:]
+#      samples_list = list(samples)
+#      samples_callset_index = [samples_list.index(s) for s in panel['sample']]
+#      panel['callset_index'] = samples_callset_index
+#      samples_ceu = (panel['pop']=='CEU')
+#      panel_CEU = panel[samples_ceu]
+#      loc_samples_ceu = panel_CEU.index.values
+#      gt_ceu_region = gt_region.take(loc_samples_ceu,axis=1)
+#      gn = gt_ceu_region.to_n_alt()
+#      m = allel.rogers_huff_r(gn) ** 2
+#      np.savez_compressed(output.ld_mat, ld_mat=m)
+      
+#rule gen_CEU_r2_full_matrix:
+#    input:
+#      expand('data/ld_mats/chr22_10MB_popCEU.npz')
