@@ -42,6 +42,7 @@ rule random_10MB_CEU:
         a = a[~np.all(a==1, axis=1)]
         a = a[~np.all(a==2, axis=1)]
         CEU_LDmat = squareform(allel.rogers_huff_r(a)**2)
+        CEU_LDmat = CEU_LDmat.astype('float16')
         np.savez_compressed(output.ld_mat, ld_mat=CEU_LDmat)
       
 rule gen_CEU_r2_full_matrix:
