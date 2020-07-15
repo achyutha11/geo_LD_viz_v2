@@ -28,7 +28,7 @@ rule random_10MB_CEU:
       vcf =  DATA_DIR + 'ALL.chr22.phase3_shapeit2_mvncall_integrated.20130502.biallelic_snps.ac5.genotypes.vcf.gz'
       vcf_idx = DATA_DIR  + 'ALL.chr22.phase3_shapeit2_mvncall_integrated.20130502.biallelic_snps.ac5.genotypes.vcf.gz.tbi' 
     output:
-      ld_mat = 'data/ld_mats/chr22_5MB_popCEU.npz'
+      ld_mat = 'data/ld_mats/chr22_5MB_popCEU'
     run:
         callset = allel.read_vcf(input.vcf, region='22:20000000-25000000', fields=['calldata/GT','samples','variants/POS'])
         gt = allel.GenotypeArray(callset['calldata/GT'])
@@ -43,7 +43,7 @@ rule random_10MB_CEU:
         a = a[~np.all(a==2, axis=1)]
         CEU_LDmat = squareform(allel.rogers_huff_r(a)**2)
         CEU_LDmat = CEU_LDmat.astype('float16')
-        np.savez_compressed(output.ld_mat, ld_mat=CEU_LDmat)
+        zarr.save('chr22_5MB_popCEU',CEU_LDmat)
       
 rule gen_CEU_r2_full_matrix:
     input:
