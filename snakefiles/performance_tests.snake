@@ -19,7 +19,7 @@ from gen_ld_mat import est_kxp_mat
 DATA_DIR  = '/project2/jnovembre/data/external_public/geo_LD/'
 VCF_1KG_DIR = '/project2/jnovembre/data/external_public/1kg_phase3/haps/'
 
- ------ Rules ------ # 
+#------ Rules ------ # 
 rule random_10MB_CEU:
     """
        Take random 5Mb segment of chromosome 22 for individuals from CEU from filtered 1kGP vcf)
