@@ -1,7 +1,7 @@
 #!python
 
 """
-    Performance testing to find an acceptable K value
+    Performance testing to find an acceptable K value + Attempting to create adaptive-K strategy
 """
 
 import numpy as np 
@@ -20,21 +20,37 @@ DATA_DIR  = '/project2/jnovembre/data/external_public/geo_LD/'
 VCF_1KG_DIR = '/project2/jnovembre/data/external_public/1kg_phase3/haps/'
 
 #------ Rules ------ # 
-rule random_5MB_CEU:
+
+rule filt_biallelic_AC_1kg:
     """
-       Take random 5Mb segment of chromosome 22 for individuals from CEU from filtered 1kGP vcf)
+       Filter to biallelic SNPs in the 1000 Genomes Dataset (with a particular
+       allele count filter)
     """
     input:
-      vcf =  DATA_DIR + 'ALL.chr22.phase3_shapeit2_mvncall_integrated.20130502.biallelic_snps.ac5.genotypes.vcf.gz'
-      #vcf_idx = DATA_DIR  + 'ALL.chr22.phase3_shapeit2_mvncall_integrated.20130502.biallelic_snps.ac5.genotypes.vcf.gz.tbi' 
+      vcf =  VCF_1KG_DIR + 'ALL.chr{CHROM}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz'
     output:
-      ld_mat = 'data/ld_mats/chr22_5MB_popCEU'
+      vcf = DATA_DIR  + 'ALL.chr{CHROM}.phase3_shapeit2_mvncall_integrated.20130502.biallelic_snps.ac{AC,\d+}.genotypes.vcf.gz',
+      vcf_idx = DATA_DIR  + 'ALL.chr{CHROM}.phase3_shapeit2_mvncall_integrated.20130502.biallelic_snps.ac{AC,\d+}.genotypes.vcf.gz.tbi' 
+    shell:
+      """
+      bcftools view -v snps -m2 -M2 -c {wildcards.AC}:minor {input.vcf} | bgzip -@4 > {output.vcf}    
+      tabix -f {output.vcf}
+      """
+    
+rule kxp_select_positions:
+    """
+       Generate k x p matri for a chosen segment of a particular chromosome for individuals from a certain population 
+    """
+    input:
+      vcf = rules.filt_biallelic_AC_1kg.output.vcf,
+      popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel' 
+    output:
+      ld_mat = 'data/performance_tests/chr{CHROM}_pos{POS1}_{POS2}_pop{POP}'
     run:
-       callset = allel.read_vcf(input.vcf, region='22:20000000-25000000', fields=['calldata/GT','samples','variants/POS'])
+       callset = allel.read_vcf(input.vcf, region='{CHROM}:{POS1}-{POS2}', fields=['calldata/GT','samples','variants/POS'])
        gt = allel.GenotypeArray(callset['calldata/GT'])
-       panel_path = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
-       panel = pd.read_csv(panel_path, sep='\t', usecols=['sample', 'pop', 'super_pop'])
-       ceu_check = (panel['pop']=='CEU')
+       panel = pd.read_csv(input.popfile, sep='\t', usecols=['sample', 'pop', 'super_pop'])
+       ceu_check = (panel['pop']=={POP})
        ceu_indices = panel[ceu_check].index.values
        ceu_gt = gt.take(ceu_indices,axis=1)
        a = ceu_gt.to_n_alt()
