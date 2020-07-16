@@ -9,3 +9,4 @@ sandbox/
 *.snakemake/
 doc/notebooks/.ipynb_checkpoints/*
 src/__pycache__/
+log/
