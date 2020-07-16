@@ -70,7 +70,7 @@ rule gen_LD_single_pop_chrom:
 
 rule gen_multipop_r2_matrices:
     input:
-      expand('data/ld_mats/chr{CHROM}_ac{AC}_K{K}_pop{POP}.npz', AC=5, POP=['CEU'], K=[200], CHROM=22)
+      expand('data/ld_mats/chr{CHROM}_ac{AC}_K{K}_pop{POP}.npz', AC=5, POP=['CEU'], K=[100], CHROM=22)
 
       
 rule split_kxp_per_chrom:
