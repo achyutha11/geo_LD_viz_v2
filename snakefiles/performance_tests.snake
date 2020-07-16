@@ -20,7 +20,7 @@ DATA_DIR  = '/project2/jnovembre/data/external_public/geo_LD/'
 VCF_1KG_DIR = '/project2/jnovembre/data/external_public/1kg_phase3/haps/'
 
 #------ Rules ------ # 
-rule random_10MB_CEU:
+rule random_5MB_CEU:
     """
        Take random 5Mb segment of chromosome 22 for individuals from CEU from filtered 1kGP vcf)
     """
@@ -43,7 +43,7 @@ rule random_10MB_CEU:
        a = a[~np.all(a==2, axis=1)]
        CEU_LDmat = squareform(allel.rogers_huff_r(a)**2)
        CEU_LDmat = CEU_LDmat.astype('float16')
-       zarr.save('chr22_5MB_popCEU',CEU_LDmat)
+       zarr.save(output.ld_mat,CEU_LDmat)
       
 rule gen_CEU_r2_full_matrix:
     input:
