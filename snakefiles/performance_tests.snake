@@ -47,4 +47,4 @@ rule random_10MB_CEU:
       
 rule gen_CEU_r2_full_matrix:
     input:
-        expand('data/ld_mats/chr22_5MB_popCEU.npz')
+        expand('data/ld_mats/chr22_5MB_popCEU')
