@@ -30,21 +30,21 @@ rule random_10MB_CEU:
     output:
       ld_mat = 'data/ld_mats/chr22_5MB_popCEU'
     run:
-        callset = allel.read_vcf(input.vcf, region='22:20000000-25000000', fields=['calldata/GT','samples','variants/POS'])
-        gt = allel.GenotypeArray(callset['calldata/GT'])
-        panel_path = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
-        panel = pd.read_csv(panel_path, sep='\t', usecols=['sample', 'pop', 'super_pop'])
-        ceu_check = (panel['pop']=='CEU')
-        ceu_indices = panel[ceu_check].index.values
-        ceu_gt = gt.take(ceu_indices,axis=1)
-        a = ceu_gt.to_n_alt()
-        a = a[~np.all(a==0, axis=1)]
-        a = a[~np.all(a==1, axis=1)]
-        a = a[~np.all(a==2, axis=1)]
-        CEU_LDmat = squareform(allel.rogers_huff_r(a)**2)
-        CEU_LDmat = CEU_LDmat.astype('float16')
-        zarr.save('chr22_5MB_popCEU',CEU_LDmat)
+       callset = allel.read_vcf(input.vcf, region='22:20000000-25000000', fields=['calldata/GT','samples','variants/POS'])
+       gt = allel.GenotypeArray(callset['calldata/GT'])
+       panel_path = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
+       panel = pd.read_csv(panel_path, sep='\t', usecols=['sample', 'pop', 'super_pop'])
+       ceu_check = (panel['pop']=='CEU')
+       ceu_indices = panel[ceu_check].index.values
+       ceu_gt = gt.take(ceu_indices,axis=1)
+       a = ceu_gt.to_n_alt()
+       a = a[~np.all(a==0, axis=1)]
+       a = a[~np.all(a==1, axis=1)]
+       a = a[~np.all(a==2, axis=1)]
+       CEU_LDmat = squareform(allel.rogers_huff_r(a)**2)
+       CEU_LDmat = CEU_LDmat.astype('float16')
+       zarr.save('chr22_5MB_popCEU',CEU_LDmat)
       
 rule gen_CEU_r2_full_matrix:
     input:
-        expand('data/ld_mats/chr22_5MB_popCEU')
+       expand('data/ld_mats/chr22_5MB_popCEU')
