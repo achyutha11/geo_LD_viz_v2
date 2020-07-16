@@ -39,28 +39,33 @@ rule filt_biallelic_AC_1kg:
     
 rule kxp_select_positions:
     """
-       Generate k x p matri for a chosen segment of a particular chromosome for individuals from a certain population 
+       Generate k x p matrix for a chosen segment of a particular chromosome for individuals from a certain population 
     """
     input:
       vcf = rules.filt_biallelic_AC_1kg.output.vcf,
       popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel' 
     output:
-      ld_mat = 'data/performance_tests/chr{CHROM}_pos{POS1}_{POS2}_pop{POP}'
+      ld_mat = 'data/performance_tests/chr{CHROM}_pos{POS1}_{POS2}_pop{POP}.npz'
     run:
        callset = allel.read_vcf(input.vcf, region='{CHROM}:{POS1}-{POS2}', fields=['calldata/GT','samples','variants/POS'])
+       # allele frequency count 
        gt = allel.GenotypeArray(callset['calldata/GT'])
        panel = pd.read_csv(input.popfile, sep='\t', usecols=['sample', 'pop', 'super_pop'])
-       ceu_check = (panel['pop']=={POP})
-       ceu_indices = panel[ceu_check].index.values
-       ceu_gt = gt.take(ceu_indices,axis=1)
-       a = ceu_gt.to_n_alt()
-       a = a[~np.all(a==0, axis=1)]
-       a = a[~np.all(a==1, axis=1)]
-       a = a[~np.all(a==2, axis=1)]
-       CEU_LDmat = squareform(allel.rogers_huff_r(a)**2)
-       CEU_LDmat = CEU_LDmat.astype('float16')
-       zarr.save(output.ld_mat,CEU_LDmat)
+       pop_check = (panel['pop']=={POP})
+       pop_indices = panel[pop_check].index.values
+       pop_gt = gt.take(pop_indices,axis=1)
+       a = pop_gt.to_n_alt()
+       snp_indices = np.empty(a.shape[0])
+       idx1 = ~np.all(a==0, axis=1)
+       idx2 = ~np.all(a==1, axis=1)
+       idx3 = ~np.all(a==2, axis=1)
+       for i in range(idx1.shape[0]):
+        if idx1[i]==True and idx2[i]==True and idx3[i]==True:
+            snp_indices[i]==i
+       LDmat = squareform(allel.rogers_huff_r(a)**2)
+       LDmat = LDmat.astype('float16')
+       numpy.savez_compressed(output.ld_mat,LDmat=LDmat,snp_indices=snp_indices)
       
-rule gen_CEU_r2_full_matrix:
+rule gen_pop_kxp_matrix:
     input:
        expand('data/ld_mats/chr22_5MB_popCEU')
