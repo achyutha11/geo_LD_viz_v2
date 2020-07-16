@@ -26,7 +26,7 @@ rule random_10MB_CEU:
     """
     input:
       vcf =  DATA_DIR + 'ALL.chr22.phase3_shapeit2_mvncall_integrated.20130502.biallelic_snps.ac5.genotypes.vcf.gz'
-      vcf_idx = DATA_DIR  + 'ALL.chr22.phase3_shapeit2_mvncall_integrated.20130502.biallelic_snps.ac5.genotypes.vcf.gz.tbi' 
+      #vcf_idx = DATA_DIR  + 'ALL.chr22.phase3_shapeit2_mvncall_integrated.20130502.biallelic_snps.ac5.genotypes.vcf.gz.tbi' 
     output:
       ld_mat = 'data/ld_mats/chr22_5MB_popCEU'
     run:
