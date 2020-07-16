@@ -167,7 +167,7 @@ rule collapse_kxp_mats:
 rule split_collapsed_ld_mats:
   input:
     expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz'
-, CHROM=22, AC=5, K=[100,200,500,1000,2500], poplist='pop', POP='CEU'),
+, CHROM=22, AC=5, K=[100], poplist='pop', POP='CEU'),
     #expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz'
 #, CHROM=22, AC=5, K=[200], poplist='superpop', POP=superpop_total)
        
