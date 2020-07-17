@@ -16,7 +16,7 @@
       "err": "log/{rule}-%j.err",
       "partition": "jnovembre",
       "ncores": "1"
-	}
+	},
 	"kxp_select_positions":
 	{
       "time" : "12:00:00",
