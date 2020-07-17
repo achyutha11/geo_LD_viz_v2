@@ -45,7 +45,7 @@ rule kxp_select_positions:
       vcf = rules.filt_biallelic_AC_1kg.output.vcf,
       popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel' 
     output:
-      ld_mat = 'data/performance_tests/chr{CHROM}_ac{AC,\d+}_K{K,\d+}_pos{POS1}_{POS2}_pop{POP}.npz'
+      ld_mat = 'data/performance_tests/chr{CHROM}_ac{AC,\d+}_K{K,\d+}_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.npz'
     run:
        # Reading in vcf 
        callset = allel.read_vcf(input.vcf, region='{CHROM}:{POS1}-{POS2}', fields=['calldata/GT','samples','variants/POS'])
@@ -78,4 +78,4 @@ rule kxp_select_positions:
       
 rule gen_pop_kxp_matrix:
     input:
-       expand('data/performance_tests/chr{CHROM}_ac{AC}_K{K}_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU'], K=[100], CHROM=22, POS1=20000000, POS2=25000000)
+       expand('data/performance_tests/chr{CHROM}_ac{AC}_K{K}_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU'], K=[100], CHROM=22, POS1=[20000000], POS2=[25000000])
