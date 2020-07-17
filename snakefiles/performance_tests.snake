@@ -113,10 +113,10 @@ rule regional_full_LD_mat:
             snp_indices.append(i)
        snp_indices = np.array(snp_indices)
        pos = callset['variants/POS'][idx1 & idx2 & idx3]
+       a = a[idx1 & idx2 & idx3]
        # Calculating allele frequency
        alt_ac = np.nansum(a, axis=1)
        alt_af = alt_ac / (2*a.shape[1])
-       a = a[idx1 & idx2 & idx3]
        # Creating full LD matrix
        ld_mat = np.corrcoef(a)**2
        ld_mat = ld_mat.astype('float16')
