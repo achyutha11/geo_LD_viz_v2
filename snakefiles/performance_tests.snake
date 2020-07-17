@@ -74,7 +74,7 @@ rule kxp_select_positions:
        a = a[idx1 & idx2 & idx3]
        # Creating k x p matrix 
        ld_mat, alt_af = est_kxp_mat(a, pop_vec, wildcards.POP, int(wildcards.K))
-       numpy.savez_compressed(output.ld_mat,ld_mat=ld_mat,snp_indices=snp_indices, pos=pos,alt_af=alt_af)
+       np.savez_compressed(output.ld_mat,ld_mat=ld_mat,snp_indices=snp_indices, pos=pos,alt_af=alt_af)
       
 rule gen_pop_kxp_matrix:
     input:
