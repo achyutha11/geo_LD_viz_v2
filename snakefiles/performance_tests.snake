@@ -48,7 +48,7 @@ rule kxp_select_positions:
       ld_mat = 'data/performance_tests/chr{CHROM}_ac{AC,\d+}_K{K,\d+}_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.npz'
     run:
        # Reading in vcf 
-       callset = allel.read_vcf(input.vcf, region=(str({CHROM})+':'+str({POS1})+'-'+str({POS2})), fields=['calldata/GT','samples','variants/POS'])
+       callset = allel.read_vcf(input.vcf, region=(str(wildcards.CHROM))+':'+str(wildcards.POS1)+'-'+str(wildcards.POS2)), fields=['calldata/GT','samples','variants/POS'])
        # Creating genotype array
        gt = allel.GenotypeArray(callset['calldata/GT'])
        # Filtering out individuals of specific population
