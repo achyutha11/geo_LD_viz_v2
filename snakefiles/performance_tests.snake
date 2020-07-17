@@ -102,13 +102,23 @@ rule regional_full_LD_mat:
        pop_gt = gt.take(pop_indices,axis=1)
        # Creating summed genotype matrix (2D)
        a = pop_gt.to_n_alt()
+       snp_indices = []
        # Filtering out non-segregating sites in the specified population
        idx1 = ~np.all(a==0, axis=1)
        idx2 = ~np.all(a==1, axis=1)
        idx3 = ~np.all(a==2, axis=1)
+       # Creating arrays of indices and positions of segregating SNPs
+       for i in range(idx1.shape[0]):
+        if idx1[i]==True and idx2[i]==True and idx3[i]==True:
+            snp_indices.append(i)
+       snp_indices = np.array(snp_indices)
+       pos = callset['variants/POS'][idx1 & idx2 & idx3]
+       # Calculating allele frequency
+       alt_ac = np.nansum(a, axis=1)
+       alt_af = alt_ac / (2*a.shape[1])
        a = a[idx1 & idx2 & idx3]
        # Creating full LD matrix
        ld_mat = np.corrcoef(a)**2
        ld_mat = ld_mat.astype('float16')
-       np.savez_compressed(output.ld_mat,ld_mat=ld_mat)
+       np.savez_compressed(output.ld_mat,ld_mat=ld_mat,snp_indices=snp_indices,pos=pos,alt_af=alt_af)
       
