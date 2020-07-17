@@ -40,6 +40,7 @@ rule filt_biallelic_AC_1kg:
 rule kxp_select_positions:
     """
        Generate k x p matrix for a chosen segment of a particular chromosome for individuals from a certain population 
+       Also generate full LD matrix for specified region
     """
     input:
       vcf = rules.filt_biallelic_AC_1kg.output.vcf,
@@ -73,8 +74,11 @@ rule kxp_select_positions:
        pos = callset['variants/POS'][idx1 & idx2 & idx3]
        a = a[idx1 & idx2 & idx3]
        # Creating k x p matrix 
-       ld_mat, alt_af = est_kxp_mat(a, pop_vec, wildcards.POP, int(wildcards.K))
-       np.savez_compressed(output.ld_mat,ld_mat=ld_mat,snp_indices=snp_indices, pos=pos,alt_af=alt_af)
+       kxp_mat, alt_af = est_kxp_mat(a, pop_vec, wildcards.POP, int(wildcards.K))
+       # Creating full LD matrix
+       ld_mat = np.corrcoef(a)**2
+       ld_mat = ld_mat.astype('float16')
+       np.savez_compressed(output.ld_mat,kxp_mat=kxp_mat,ld_mat=ld_mat,snp_indices=snp_indices, pos=pos,alt_af=alt_af)
       
 rule gen_pop_kxp_matrix:
     input:
