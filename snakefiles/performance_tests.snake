@@ -78,4 +78,4 @@ rule kxp_select_positions:
       
 rule gen_pop_kxp_matrix:
     input:
-       expand('data/performance_tests/chr{CHROM}_ac{AC}_K{K}_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['YRI'], K=[100], CHROM=22, POS1=10000000, POS2=15000000)
+       expand('data/performance_tests/chr{CHROM}_ac{AC}_K{K}_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['YRI'], K=[100], CHROM=22, POS1=30000000, POS2=35000000)
