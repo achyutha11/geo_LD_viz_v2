@@ -39,7 +39,8 @@ rule filt_biallelic_AC_1kg:
     
 rule kxp_select_positions:
     """
-       Generate k x p matrix for a chosen segment of a particular chromosome for individuals from a certain population 
+       Generate k x p matrix for a chosen segment of a particular chromosome for individuals from a certain population, 
+       Filtering out non-segregating sites in that particular population
     """
     input:
       vcf = rules.filt_biallelic_AC_1kg.output.vcf,
@@ -75,12 +76,43 @@ rule kxp_select_positions:
        # Creating k x p matrix 
        ld_mat, alt_af = est_kxp_mat(a, pop_vec, wildcards.POP, int(wildcards.K))
        np.savez_compressed(output.ld_mat,ld_mat=ld_mat,snp_indices=snp_indices, pos=pos,alt_af=alt_af)
+    
+rule unfiltered_kxp_positions:
+    """
+       Generate k x p matrix for a chosen segment of a particular chromosome for individuals from a certain population,
+       WITHOUT filtering out non-segregating sites in the population
+    """
+    input:
+      vcf = rules.filt_biallelic_AC_1kg.output.vcf,
+      popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel' 
+    output:
+      ld_mat = 'data/performance_tests/chr{CHROM}_ac{AC,\d+}_K{K,\d+}_pos{POS1,\d+}_{POS2,\d+}_unfiltered_pop{POP}.npz'
+    run:
+       # Reading in vcf 
+       callset = allel.read_vcf(input.vcf, region=(str(wildcards.CHROM))+':'+str(wildcards.POS1)+'-'+str(wildcards.POS2), fields=['calldata/GT','samples','variants/POS'])
+       # Creating genotype array
+       gt = allel.GenotypeArray(callset['calldata/GT'])
+       # Filtering out individuals of specific population
+       panel = pd.read_csv(input.popfile, sep='\t', usecols=['sample', 'pop', 'super_pop'])
+       pop_check = (panel['pop']==wildcards.POP)
+       pop_indices = panel[pop_check].index.values
+       pop_vec = panel['pop'].values
+       pop_vec = pop_vec[pop_check]
+       pop_gt = gt.take(pop_indices,axis=1)
+       # Creating summed genotype matrix (2D)
+       a = pop_gt.to_n_alt()   
+       # Creating arrays of indices and positions of segregating SNPs 
+       pos = callset['variants/POS']
+       # Creating k x p matrix 
+       ld_mat, alt_af = est_kxp_mat(a, pop_vec, wildcards.POP, int(wildcards.K))
+       np.savez_compressed(output.ld_mat,ld_mat=ld_mat, pos=pos,alt_af=alt_af)
       
 rule gen_pop_kxp_matrix:
     input:
        expand('data/performance_tests/chr{CHROM}_ac{AC}_K{K}_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU','FIN'], K=[100,200,500,1000,2500], CHROM=22, POS1=20000000, POS2=25000000),
-       expand('data/performance_tests/chr{CHROM}_ac{AC}_full_LD_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU','FIN'], CHROM=22, POS1=20000000, POS2=25000000)
-    
+       expand('data/performance_tests/chr{CHROM}_ac{AC}_full_LD_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU','FIN'], CHROM=22, POS1=20000000, POS2=25000000),
+       expand('data/performance_tests/chr{CHROM}_ac{AC}_K{K}_pos{POS1}_{POS2}_unfiltered_pop{POP}.npz', AC=5, POP=['CEU','FIN'],K=[100,200,500,1000], CHROM=22, POS1=20000000, POS2=25000000)
+         
 rule regional_full_LD_mat:
     """
        Generate full LD matrix for the chosen segment of a particular chromosome for individuals from a certain population 
