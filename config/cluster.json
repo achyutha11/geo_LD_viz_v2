@@ -34,5 +34,14 @@
       "err": "log/{rule}-%j.err",
       "partition": "jnovembre",
       "ncores": "1"
+	},
+	"regional_full_LD_mat":
+	{
+      "time" : "12:00:00",
+      "mem": "10G",
+      "out": "log/{rule}-%j.out",
+      "err": "log/{rule}-%j.err",
+      "partition": "jnovembre",
+      "ncores": "1"
 	}
 }
