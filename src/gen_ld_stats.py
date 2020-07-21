@@ -3,42 +3,57 @@
 """
     Functions to return an array of LD scores for each SNP from a K x P LD matrix 
 """
-
 from tqdm import tqdm
 import numpy as np
 
-# First attempt to create LD score function
+def ld_score_snp_k(kxp_mat, idx):
+  """
+    Calculate ld_score based on k-nearest variants for a given snp
+  """  
+  # Creating empty array to be filled with LD scores, length = number of SNPs    
+  localmat = kxp_mat[:,:idx+1]
+  # Taking sum of reverse diagonal of matrix
+  diag = np.sum(np.fliplr(localmat).diagonal())
+  # Calculating sum of ith column values
+  col = np.sum(kxp_mat[:,idx])
+  # Adding column and diagonal sums
+  score = (col + diag - kxp_mat[0,idx]
+  return(score)
 
-def ld_score(LDmat):
-    # Creating empty array to be filled with LD scores, length = number of SNPs
-    scores = np.zeros(LDmat.shape[1])
-    # While loop creates diagonal component of LD score, ends either when first column or last row of LD matrix is reached
-    for i in tqdm(range(LDmat.shape[1])):
-        col = i 
-        row = 0
-        diag = 0
-        # Adding each cell in the diagonal to diag
-        while col>=1 and row<(LDmat.shape[0]-2):
-            diag += LDmat[1+row,col-1] 
-            col -= 1
-            row += 1
-        # Adds sum of column to sum of diagonal
-        scores[i]=np.sum(LDmat[:,i]) + diag
-    return scores
+def ld_score_k(kxp_mat):
+  """
+    Calculate LD Scores based on the k-nearest variants
+    Arguments:
+      kxp_mat : a K x P matrix where entries correspond to r^2 metrics
+  """
+  k,nsnps = kxp_mat.shape
+  scores = np.zeros(nsnps, dtype=np.float32)
+  for i in tqdm(range(nsnps)):
+    # Calculating the single-variant scores in this loop 
+    scores[i] = ld_score_snp_k(kxp_mat, i)
+  return(scores)
 
-# Second attempt to create LD score function
+           
 
-def ld_score_v2(LDmat):
-    # Creating empty array to be filled with LD scores, length = number of SNPs
-    scores = np.zeros(LDmat.shape[1])
-    # Iterating through each column of K x P matrix
-    for i in tqdm(range(LDmat.shape[1])):        
-        localmat = LDmat[:,:i+1]
-        # Taking sum of reverse diagonal of matrix
-        flpdiag = np.fliplr(localmat).diagonal()
-        diag = np.sum(flpdiag)
-        # Calculating sum of ith column values
-        col = np.sum(LDmat[:,i])
-        # Adding column and diagonal sums
-        scores[i] = col + diag - LDmat[0,i]
-    return scores
+def ld_score_snp_pos(kxp_mat, pos, idx, win_size=1e6):
+  """
+    Compute the LD-Score for a given snp index
+    Arguments:
+      kxp_mat : a K x P matrix where entries correspond to r^2 metrics
+      pos : P-length vector 
+      idx : integer for snp index
+    
+  """
+  k, nsnps = kxp_mat.shape
+  assert(pos.size == nsnps)
+  focal_pos = pos[idx]
+  # Get the range of positions 
+  min_pos, max_pos = (focal_pos - win_size/2.), (focal_pos + win_size/2.)
+  idx_win = np.where((pos >= min_pos) & (pos <= max_pos))[0]
+  kxp_mat_loc = [:,idx_win]
+  pass         
+     
+                     
+  
+  
+  
