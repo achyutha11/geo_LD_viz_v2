@@ -19,7 +19,7 @@
 	},
 	"kxp_select_positions":
 	{
-      "time" : "12:00:00",
+      "time" : "24:00:00",
       "mem": "10G",
       "out": "log/{rule}-%j.out",
       "err": "log/{rule}-%j.err",
