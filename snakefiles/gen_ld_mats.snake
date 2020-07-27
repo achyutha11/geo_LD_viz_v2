@@ -204,19 +204,30 @@ rule adaptive_k_single_pop_chrom:
       vcf = rules.filt_biallelic_AC_1kg.output.vcf,
       popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
     output:
-      adaptive_ld_mat = 'data/ld_mats/adaptive_chr{CHROM}_ac{AC,\d+}_K{K,\d+}_pop{POP}.npz'    
+      adaptive_ld_mat = 'data/ld_mats/adaptive_chr{CHROM}_ac{AC,\d+}_pop{POP}.npz'    
     run:
+      # Reading in vcf
       callset = allel.read_vcf(input.vcf, fields=['calldata/GT','samples','variants/POS'])
+      # Generating genotype array
       gt = allel.GenotypeArray(callset['calldata/GT'])
+      # Filtering out particular population
       panel = pd.read_csv(input.popfile, sep='\t', usecols=['sample', 'pop', 'super_pop'])
       pop_check = (panel['pop']==wildcards.POP)
       pop_indices = panel[pop_check].index.values
       pop_gt = gt.take(pop_indices,axis=1)
+      # Creating summed genotype matrix
       a = pop_gt.to_n_alt()
+      # Empty list for arrays
       full_r2_list = []
+      # Appending each array to list and saving
       for i in range(a.shape[0]):
             full_r2_list.append(adaptive_ld_mat_snp(a,i))
       adaptive_arrays = np.array(full_r2_list)
       np.savez_compressed(output.adaptive_ld_mat, adaptive_arrays=adaptive_arrays)
+        
+rule adaptive_ld_mats:
+    input:
+        expand('data/ld_mats/adaptive_chr{CHROM}_ac{AC,\d+}_pop{POP}.npz', CHROM=22, AC=5, POP='CEU')
+        
     
              
