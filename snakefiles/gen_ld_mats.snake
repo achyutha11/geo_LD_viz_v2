@@ -10,6 +10,8 @@ import allel
 import sys
 sys.path.append('src/')
 from gen_ld_mat import est_kxp_mat
+from gen_ld_mat import running_mean
+from gen_ld_mat import adaptive_ld_mat_snp
 
 # ------- Data Directories ------ # 
 DATA_DIR  = '/project2/jnovembre/data/external_public/geo_LD/'
@@ -168,8 +170,8 @@ rule split_collapsed_ld_mats:
   input:
     expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz'
 , CHROM=22, AC=5, K=[100], poplist='pop', POP='CEU'),
-    #expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz'
-#, CHROM=22, AC=5, K=[200], poplist='superpop', POP=superpop_total)
+    expand('data/ld_mats/chr{CHROM}/filt_ac{AC}_K{K}_{poplist}_{POP}_collected.npz'
+, CHROM=22, AC=5, K=[200], poplist='superpop', POP=superpop_total)
        
 
 
@@ -191,4 +193,30 @@ rule binning_ld_values_8bit:
       ld_mat_binned = np.digitize(ld_mat, right=True)
       ld_mat_binned = ld_mat_binned.astype(np.uint8)
       np.savez_compressed(output.ld_mat_binned, chrom=x['chrom'], positions=x['positions'], alt_af=x['alt_af'], ld_mat = ld_mat_binned)
+   
+
+
+rule adaptive_k_single_pop_chrom:
+    """
+        Generate list containing r2 arrays for each SNP on a chromosome for a population
+    """
+    input:
+      vcf = rules.filt_biallelic_AC_1kg.output.vcf,
+      popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
+    output:
+      adaptive_ld_mat = 'data/ld_mats/adaptive_chr{CHROM}_ac{AC,\d+}_K{K,\d+}_pop{POP}.npz'    
+    run:
+      callset = allel.read_vcf(input.vcf, fields=['calldata/GT','samples','variants/POS'])
+      gt = allel.GenotypeArray(callset['calldata/GT'])
+      panel = pd.read_csv(input.popfile, sep='\t', usecols=['sample', 'pop', 'super_pop'])
+      pop_check = (panel['pop']==wildcards.POP)
+      pop_indices = panel[pop_check].index.values
+      pop_gt = gt.take(pop_indices,axis=1)
+      a = pop_gt.to_n_alt()
+      full_r2_list = []
+      for i in range(a.shape[0]):
+            full_r2_list.append(adaptive_ld_mat_snp(a,i))
+      adaptive_arrays = np.array(full_r2_list)
+      np.savez_compressed(output.adaptive_ld_mat, adaptive_arrays=adaptive_arrays)
+    
              
