@@ -84,7 +84,7 @@ rule adaptive_k_single_pop_chrom:
       vcf = rules.filt_biallelic_AC_1kg.output.vcf,
       popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
     output:
-      adaptive_ld_mat = 'data/ld_mats/chr{CHROM}_ac{AC,\d+}_pop{POP}.adaptive.npz'    
+      adaptive_ld_mat = 'data/ld_mats_perf/chr{CHROM}_ac{AC,\d+}_pop{POP}.adaptive.npz'    
     run:
       # Reading in vcf
       callset = allel.read_vcf(input.vcf, fields=['calldata/GT','samples', 'variants/CHROM', 'variants/POS'])
@@ -124,7 +124,7 @@ rule adaptive_k_single_pop_chrom:
         
 rule adaptive_ld_mats:
   input:
-    expand('data/ld_mats/chr{CHROM}_ac{AC}_pop{POP}.adaptive.npz', CHROM=22, AC=5, POP=['CEU', 'CHB'])      
+    expand('data/ld_mats_perf/chr{CHROM}_ac{AC}_pop{POP}.adaptive.npz', CHROM=22, AC=5, POP=['CEU', 'CHB'])      
      
       
 # ------- Split Versions ------- #       
