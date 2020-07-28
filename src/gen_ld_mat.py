@@ -8,7 +8,6 @@
 import numpy as np
 from tqdm import tqdm
 
-
 def est_kxp_mat(gt_mat, pop_vec, pop, K=500):
     """
         Arguments:
@@ -36,12 +35,26 @@ def est_kxp_mat(gt_mat, pop_vec, pop, K=500):
     return(kxp_ld_mat, alt_af)
 
 
-def running_mean(x, N):
+def running_mean(x, n):
   """
-    Calculate a running mean 
+    Calculate a running mean across a numpy vector
+    Arguments:
+      x : numpy array
+      n : size of window to compute running average over   
   """
+  assert(n > 1)
   cumsum = np.nancumsum(x) 
-  return (cumsum[N:] - cumsum[:-N]) / float(N)
+  return (cumsum[n:] - cumsum[:-n]) / float(n)
+
+def stack_ragged(array_list, axis=0):
+  """
+    Method to stack ragged arrays while retaining
+    the indices
+  """
+  lengths = [np.shape(a)[axis] for a in array_list]
+  idx = np.cumsum(lengths[:-1])
+  stacked = np.concatenate(array_list, axis=axis)
+  return(stacked, idx)
 
 def adaptive_ld_mat_snp(gt, idx, eps=0.05, n=25, blen=100):
   """
@@ -70,10 +83,8 @@ def adaptive_ld_mat_snp(gt, idx, eps=0.05, n=25, blen=100):
     # Check if any entry in the moving average is < eps
     if np.any(cur_mean_r2 <= eps):
       going = False
-  if len(r2_vec_tot) > 1:  
-    r2_vec_tot = np.hstack(r2_vec_tot)
-  else:
-    r2_vec_tot = np.array(r2_vec_tot)
+  # Convert to an array - note - this is deprecated 
+  r2_vec_tot = np.array(r2_vec_tot).flatten()
   return(r2_vec_tot)
       
   
