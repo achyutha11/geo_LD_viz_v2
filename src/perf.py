@@ -95,7 +95,7 @@ def frac_covered_adaptive(full_ld_mat, adaptive_ld_mat, idx_adaptive, epsilon=1e
       epsilon : float value 
   """
   # Check that epsilon is in the appropriate range
-  assert((epsilon > 0.) && (epsilon < 1.))
+  assert((epsilon > 0.) & (epsilon < 1.))
   nsnps,_ = full_ld_mat.shape
   nsnps_inf = idx_adaptive.size
   assert(nsnps == nsnps_inf)
