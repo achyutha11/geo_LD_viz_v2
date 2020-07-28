@@ -46,7 +46,7 @@ def frac_covered_k_banded(full_ld_mat, kxp_mat, epsilon=1e-2):
       frac : fraction of r2 > epsilon detected
   """
   # Check that epsilon is in the appropriate range
-  assert((epsilon > 0.) && (epsilon < 1.))
+  assert((epsilon > 0.) & (epsilon < 1.))
   nsnps,_ = full_ld_mat.shape
   k,p = kxp_mat.shape
   # Check that the number of snps is the same
