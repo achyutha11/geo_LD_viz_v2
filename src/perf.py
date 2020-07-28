@@ -9,29 +9,29 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-def fractions(epsilon):
+# def fractions(epsilon):
     
-    # Filtering out and counting number of r2 values > eps in each KxP maatrix and full matrix
-    # First row of KxP matrix not counted, all 1s
-    idx = POP_full_mat > epsilon
-    idx100 = POP_K100_kxp[1:,:] > epsilon
-    idx200 = POP_K200_kxp[1:,:] > epsilon
-    idx500 = POP_K500_kxp[1:,:] > epsilon
-    idx1000 = POP_K1000_kxp[1:,:] > epsilon
-    idx2500 = POP_K2500_kxp[1:,:] > epsilon
+#     # Filtering out and counting number of r2 values > eps in each KxP maatrix and full matrix
+#     # First row of KxP matrix not counted, all 1s
+#     idx = POP_full_mat > epsilon
+#     idx100 = POP_K100_kxp[1:,:] > epsilon
+#     idx200 = POP_K200_kxp[1:,:] > epsilon
+#     idx500 = POP_K500_kxp[1:,:] > epsilon
+#     idx1000 = POP_K1000_kxp[1:,:] > epsilon
+#     idx2500 = POP_K2500_kxp[1:,:] > epsilon
 
-    # Full matrix count divided by 2 due to symmetry
-    tot = np.count_nonzero(idx)/2
-    k100 = np.count_nonzero(idx100)
-    k200 = np.count_nonzero(idx200)
-    k500 = np.count_nonzero(idx500)
-    k1000 = np.count_nonzero(idx1000)
-    k2500 = np.count_nonzero(idx2500)
+#     # Full matrix count divided by 2 due to symmetry
+#     tot = np.count_nonzero(idx)/2
+#     k100 = np.count_nonzero(idx100)
+#     k200 = np.count_nonzero(idx200)
+#     k500 = np.count_nonzero(idx500)
+#     k1000 = np.count_nonzero(idx1000)
+#     k2500 = np.count_nonzero(idx2500)
 
-    # Returns list of fraction of LD above eps covered by each K value 
-    fr = [k100/tot,k200/tot,k500/tot,k1000/tot,k2500/tot]
+#     # Returns list of fraction of LD above eps covered by each K value 
+#     fr = [k100/tot,k200/tot,k500/tot,k1000/tot,k2500/tot]
     
-    return fr
+#     return fr
 
 def frac_covered_k_banded(full_ld_mat, kxp_mat, epsilon=1e-2):
   """
@@ -41,6 +41,9 @@ def frac_covered_k_banded(full_ld_mat, kxp_mat, epsilon=1e-2):
       full_ld_mat : p x p numpy.array of r2 values
       kxp : k x p numpy array of r2 values
       epsilon : float value 
+    Returns:
+      k : value of k 
+      frac : fraction of r2 > epsilon detected
   """
   # Check that epsilon is in the appropriate range
   assert((epsilon > 0.) && (epsilon < 1.))
@@ -53,8 +56,35 @@ def frac_covered_k_banded(full_ld_mat, kxp_mat, epsilon=1e-2):
   tot_kxp = np.nansum(kxp_mat > epsilon)
   assert(tot_kxp/tot_full <= 1.0)
   
-  return(tot_kxp/tot_full)
-  
+  return(k, tot_kxp/tot_full)
+
+def frac_covered_k_banded_all(full_ld_mat_file, kxp_mat_files, epsilon=1e-2):
+  """
+    Computing the fraction of r2 values > epsilon covered across many files
+    Arguments:
+      full_ld_mat_file : a .npz file containing the full LD matrix
+      kxp_mat_files : a list of files for the kxp matrices
+      epsilon : lower threshold of LD that we want to detect 
+    Returns:
+      kxs : np.array containing values of k
+      fracs : np.array containing values of the fractions
+  """
+  full_LD = np.load(full_ld_mat_file)
+  full_mat = full_LD['ld_mat']
+  n = len(kxp_mat_files)
+  ks = np.zeros(n)
+  fracs = np.zeros(n)
+  i = 0
+  for file in tqdm(kxp_mat_files):
+    kxp_mat_data = np.load(file)
+    kxp_mat = kxp_mat_data['ld_mat']
+    cur_k, cur_frac = frac_covered_k_banded(full_LD, kxp_mat, epsilon=epsilon)
+    ks[i] = cur_k
+    fracs[i] = cur_frac
+    i += 1
+  return(ks, fracs)
+
+
 def frac_covered_adaptive(full_ld_mat, adaptive_ld_mat, idx_adaptive, epsilon=1e-2):
   """
     Compare the fraction of r2 entries covered 
@@ -78,6 +108,8 @@ def frac_covered_adaptive(full_ld_mat, adaptive_ld_mat, idx_adaptive, epsilon=1e
   return(tot_adaptive / tot_full)
   
 
+  
+  
   
 # NOTE : we want to avoid the hardcoding of files in there
 def perf_test_plot(POP):

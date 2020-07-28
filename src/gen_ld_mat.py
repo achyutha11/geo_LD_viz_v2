@@ -87,9 +87,3 @@ def adaptive_ld_mat_snp(gt, idx, eps=0.05, n=25, blen=100):
   r2_vec_tot = np.array(r2_vec_tot).flatten()
   return(r2_vec_tot)
       
-  
-
-
-
-
-

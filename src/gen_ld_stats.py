@@ -29,10 +29,14 @@ def ld_score_k(kxp_mat):
   k,nsnps = kxp_mat.shape
   scores = np.zeros(nsnps, dtype=np.float32)
   for i in tqdm(range(nsnps)):
-    # Calculating the single-variant scores in this loop 
     scores[i] = ld_score_snp_k(kxp_mat, i)
   return(scores)
-
+           
+           
+def ld_score_adaptive():
+   
+           pass
+           
            
 
 def ld_score_snp_pos(kxp_mat, pos, idx, win_size=1e6):
