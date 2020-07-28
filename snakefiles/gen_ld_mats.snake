@@ -9,9 +9,8 @@ from tqdm import tqdm
 import allel
 import sys
 sys.path.append('src/')
-from gen_ld_mat import est_kxp_mat
-from gen_ld_mat import running_mean
-from gen_ld_mat import adaptive_ld_mat_snp
+from gen_ld_mat import *
+
 
 # ------- Data Directories ------ # 
 DATA_DIR  = '/project2/jnovembre/data/external_public/geo_LD/'
@@ -75,6 +74,60 @@ rule gen_multipop_r2_matrices:
       expand('data/ld_mats/chr{CHROM}_ac{AC}_K{K}_pop{POP}.npz', AC=5, POP=['CEU'], K=[100], CHROM=22)
 
       
+rule adaptive_k_single_pop_chrom:
+    """
+        Generate list containing r2 arrays for each SNP
+        on a chromosome for a population using the adaptive algorithm
+        NOTE : we should ideally have the input parameters for the algorithm in here as well ... 
+    """
+    input:
+      vcf = rules.filt_biallelic_AC_1kg.output.vcf,
+      popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
+    output:
+      adaptive_ld_mat = 'data/ld_mats/chr{CHROM}_ac{AC,\d+}_pop{POP}.adaptive.npz'    
+    run:
+      # Reading in vcf
+      callset = allel.read_vcf(input.vcf, fields=['calldata/GT','samples', 'variants/CHROM', 'variants/POS'])
+      chroms = callset['variants/CHROM']
+      positions = callset['variants/POS']
+      # Generating genotype array
+      gt = allel.GenotypeArray(callset['calldata/GT'])
+      # Filtering out particular population
+      panel = pd.read_csv(input.popfile, sep='\t', usecols=['sample', 'pop', 'super_pop'])
+      pop_check = (panel['pop']==wildcards.POP)
+      pop_indices = panel[pop_check].index.values
+      pop_gt = gt.take(pop_indices, axis=1)
+      # Creating summed genotype matrix
+      gt_mat = pop_gt.to_n_alt()
+      _, nsamp = gt_mat.shape
+      # Calculate alt AF
+      alt_af = np.sum(gt_mat, axis=1)/(2*nsamp)
+      
+      # Filter this to only the sites that are polymorphic
+      idx_polymorphic = ((alt_af > 0) & (alt_af < 1))
+      alt_af_filt = alt_af[idx_polymorphic]
+      gt_mat_filt = gt_mat[idx_polymorphic,:]
+      nsnps_filt, nsamp_filt = gt_mat_filt.shape
+      
+      # Empty list for arrays
+      full_r2_list = []
+      # Appending each array to list and saving
+      for i in tqdm(range(nsnps_filt)):
+        snp_r2_adaptive = adaptive_ld_mat_snp(gt_mat_filt, i)
+        full_r2_list.append(snp_r2_adaptive)
+      # Stack the array in a clever way
+      # NOTE : we still might have to think of a better way to stack
+      adaptive_ld_mat, idxs = stack_ragged(full_r2_list)
+      np.savez_compressed(output.adaptive_ld_mat,
+                          adaptive_ld_mat=adaptive_ld_mat, idx=idxs,
+                          chroms=chroms[idx_polymorphic], positions=positions[idx_polymorphic], alt_af = alt_af_filt)
+        
+rule adaptive_ld_mats:
+  input:
+    expand('data/ld_mats/chr{CHROM}_ac{AC}_pop{POP}.adaptive.npz', CHROM=22, AC=5, POP=['CEU', 'CHB'])      
+     
+      
+# ------- Split Versions ------- #       
 rule split_kxp_per_chrom:
   """
     Split the data into TOT_N chunks for easier parallelization
@@ -193,41 +246,6 @@ rule binning_ld_values_8bit:
       ld_mat_binned = np.digitize(ld_mat, right=True)
       ld_mat_binned = ld_mat_binned.astype(np.uint8)
       np.savez_compressed(output.ld_mat_binned, chrom=x['chrom'], positions=x['positions'], alt_af=x['alt_af'], ld_mat = ld_mat_binned)
-   
 
-
-rule adaptive_k_single_pop_chrom:
-    """
-        Generate list containing r2 arrays for each SNP on a chromosome for a population
-    """
-    input:
-      vcf = rules.filt_biallelic_AC_1kg.output.vcf,
-      popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
-    output:
-      adaptive_ld_mat = 'data/ld_mats/adaptive_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.npz'    
-    run:
-      # Reading in vcf
-      callset = allel.read_vcf(input.vcf, region=(str(wildcards.CHROM))+':'+str(wildcards.POS1)+'-'+str(wildcards.POS2), fields=['calldata/GT','samples','variants/POS'])
-      # Generating genotype array
-      gt = allel.GenotypeArray(callset['calldata/GT'])
-      # Filtering out particular population
-      panel = pd.read_csv(input.popfile, sep='\t', usecols=['sample', 'pop', 'super_pop'])
-      pop_check = (panel['pop']==wildcards.POP)
-      pop_indices = panel[pop_check].index.values
-      pop_gt = gt.take(pop_indices,axis=1)
-      # Creating summed genotype matrix
-      a = pop_gt.to_n_alt()
-      # Empty list for arrays
-      full_r2_list = []
-      # Appending each array to list and saving
-      for i in range(a.shape[0]):
-            full_r2_list.append(adaptive_ld_mat_snp(a,i))
-      adaptive_arrays = np.array(full_r2_list)
-      np.savez_compressed(output.adaptive_ld_mat, adaptive_arrays=adaptive_arrays)
-        
-rule adaptive_ld_mats:
-    input:
-        expand('data/ld_mats/adaptive_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz', CHROM=22, AC=5, POP='CEU',POS1=20000000, POS2=25000000)
-        
     
              
