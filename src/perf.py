@@ -78,7 +78,7 @@ def frac_covered_k_banded_all(full_ld_mat_file, kxp_mat_files, epsilon=1e-2):
   for file in tqdm(kxp_mat_files):
     kxp_mat_data = np.load(file)
     kxp_mat = kxp_mat_data['ld_mat']
-    cur_k, cur_frac = frac_covered_k_banded(full_LD, kxp_mat, epsilon=epsilon)
+    cur_k, cur_frac = frac_covered_k_banded(full_mat, kxp_mat, epsilon=epsilon)
     ks[i] = cur_k
     fracs[i] = cur_frac
     i += 1
