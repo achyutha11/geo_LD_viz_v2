@@ -52,8 +52,8 @@ def frac_covered_k_banded(full_ld_mat, kxp_mat, epsilon=1e-2):
   # Check that the number of snps is the same
   assert(nsnps == p)
   # Compute the number of entries 
-  tot_full = np.nansum(full_ld_mat > epsilon)/2
-  tot_kxp = np.nansum(kxp_mat[1:,:] > epsilon)
+  tot_full = np.nansum(np.tril(full_ld_mat,k=-1) > epsilon)
+  tot_kxp = np.nansum(kxp_mat[2:,:] > epsilon)
   assert(tot_kxp/tot_full <= 1.0)
   
   return(k, tot_kxp/tot_full)
