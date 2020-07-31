@@ -37,6 +37,55 @@ rule filt_biallelic_AC_1kg:
       tabix -f {output.vcf}
       """
     
+
+         
+rule regional_full_LD_mat:
+    """
+       Generate full LD matrix for the chosen segment of a particular chromosome for individuals from a certain population 
+    """
+    input:
+      vcf = rules.filt_biallelic_AC_1kg.output.vcf,
+      popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel' 
+    output:
+      ld_mat = 'data/performance_tests/chr{CHROM}_ac{AC,\d+}_full_LD_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.npz'
+    run:
+       # Reading in vcf 
+       callset = allel.read_vcf(input.vcf, region=(str(wildcards.CHROM))+':'+str(wildcards.POS1)+'-'+str(wildcards.POS2), fields=['calldata/GT','samples','variants/POS'])
+       # Creating genotype array
+       gt = allel.GenotypeArray(callset['calldata/GT'])
+       # Filtering out individuals of specific population
+       panel = pd.read_csv(input.popfile, sep='\t', usecols=['sample', 'pop', 'super_pop'])
+       pop_check = (panel['pop']==wildcards.POP)
+       pop_indices = panel[pop_check].index.values
+       pop_gt = gt.take(pop_indices,axis=1)
+       # Creating summed genotype matrix (2D)
+       a = pop_gt.to_n_alt()
+       snp_indices = []
+       # Filtering out non-segregating sites in the specified population
+       idx1 = ~np.all(a==0, axis=1)
+       idx2 = ~np.all(a==1, axis=1)
+       idx3 = ~np.all(a==2, axis=1)
+       # Creating arrays of indices and positions of segregating SNPs
+       for i in range(idx1.shape[0]):
+        if idx1[i]==True and idx2[i]==True and idx3[i]==True:
+            snp_indices.append(i)
+       snp_indices = np.array(snp_indices)
+       pos = callset['variants/POS'][idx1 & idx2 & idx3]
+       a = a[idx1 & idx2 & idx3]
+       # Calculating allele frequency
+       alt_ac = np.nansum(a, axis=1)
+       alt_af = alt_ac / (2*a.shape[1])
+       # Creating full LD matrix
+       ld_mat = np.corrcoef(a)**2
+       ld_mat = ld_mat.astype('float16')
+       np.savez_compressed(output.ld_mat,ld_mat=ld_mat,snp_indices=snp_indices,pos=pos,alt_af=alt_af)
+
+rule gen_full_LD_mat:
+  input:
+    expand('data/performance_tests/chr{CHROM}_ac{AC}_full_LD_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU'], CHROM=22, POS1=20000000, POS2=25000000),        
+        
+      
+# ----------------- K x P Analysis --------------------- # 
 rule kxp_select_positions:
     """
        Generate k x p matrix for a chosen segment of a particular chromosome for individuals from a certain population, 
@@ -63,6 +112,7 @@ rule kxp_select_positions:
        a = pop_gt.to_n_alt()
        snp_indices = []
        # Filtering out non-segregating sites in the specified population
+        # (NOTE : this can be done with a check on the allele frequency)
        idx1 = ~np.all(a==0, axis=1)
        idx2 = ~np.all(a==1, axis=1)
        idx3 = ~np.all(a==2, axis=1)
@@ -108,52 +158,11 @@ rule unfiltered_kxp_positions:
        np.savez_compressed(output.ld_mat,ld_mat=ld_mat, pos=pos,alt_af=alt_af)
       
 rule gen_pop_kxp_matrix:
-    input:
-       expand('data/performance_tests/chr{CHROM}_ac{AC}_K{K}_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU','FIN','CHB','YRI'], K=[100,200,500,1000,2500], CHROM=22, POS1=20000000, POS2=25000000),
-       expand('data/performance_tests/chr{CHROM}_ac{AC}_full_LD_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU','FIN','YRI','CHB'], CHROM=22, POS1=20000000, POS2=25000000),
-       expand('data/performance_tests/chr{CHROM}_ac{AC}_K{K}_pos{POS1}_{POS2}_unfiltered_pop{POP}.npz', AC=5, POP=['CEU'],K=[100,200,500,1000], CHROM=22, POS1=20000000, POS2=25000000)
-         
-rule regional_full_LD_mat:
-    """
-       Generate full LD matrix for the chosen segment of a particular chromosome for individuals from a certain population 
-    """
-    input:
-      vcf = rules.filt_biallelic_AC_1kg.output.vcf,
-      popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel' 
-    output:
-      ld_mat = 'data/performance_tests/chr{CHROM}_ac{AC,\d+}_full_LD_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.npz'
-    run:
-       # Reading in vcf 
-       callset = allel.read_vcf(input.vcf, region=(str(wildcards.CHROM))+':'+str(wildcards.POS1)+'-'+str(wildcards.POS2), fields=['calldata/GT','samples','variants/POS'])
-       # Creating genotype array
-       gt = allel.GenotypeArray(callset['calldata/GT'])
-       # Filtering out individuals of specific population
-       panel = pd.read_csv(input.popfile, sep='\t', usecols=['sample', 'pop', 'super_pop'])
-       pop_check = (panel['pop']==wildcards.POP)
-       pop_indices = panel[pop_check].index.values
-       pop_gt = gt.take(pop_indices,axis=1)
-       # Creating summed genotype matrix (2D)
-       a = pop_gt.to_n_alt()
-       snp_indices = []
-       # Filtering out non-segregating sites in the specified population
-       idx1 = ~np.all(a==0, axis=1)
-       idx2 = ~np.all(a==1, axis=1)
-       idx3 = ~np.all(a==2, axis=1)
-       # Creating arrays of indices and positions of segregating SNPs
-       for i in range(idx1.shape[0]):
-        if idx1[i]==True and idx2[i]==True and idx3[i]==True:
-            snp_indices.append(i)
-       snp_indices = np.array(snp_indices)
-       pos = callset['variants/POS'][idx1 & idx2 & idx3]
-       a = a[idx1 & idx2 & idx3]
-       # Calculating allele frequency
-       alt_ac = np.nansum(a, axis=1)
-       alt_af = alt_ac / (2*a.shape[1])
-       # Creating full LD matrix
-       ld_mat = np.corrcoef(a)**2
-       ld_mat = ld_mat.astype('float16')
-       np.savez_compressed(output.ld_mat,ld_mat=ld_mat,snp_indices=snp_indices,pos=pos,alt_af=alt_af)
-        
+  input:
+    expand('data/performance_tests/chr{CHROM}_ac{AC}_K{K}_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU'], K=[100,200,500,1000], CHROM=22, POS1=20000000, POS2=25000000),
+#     expand('data/performance_tests/chr{CHROM}_ac{AC}_K{K}_pos{POS1}_{POS2}_unfiltered_pop{POP}.npz', AC=5, POP=['CEU'],K=[100,200,500,1000], CHROM=22, POS1=20000000, POS2=25000000)      
+      
+
 rule adaptive_k_single_pop_chrom:
     """
         Generate list containing r2 arrays for each SNP on a chromosome for a population
@@ -165,25 +174,43 @@ rule adaptive_k_single_pop_chrom:
       adaptive_ld_mat = 'data/performance_tests/adaptive_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.npz'    
     run:
       # Reading in vcf
-      callset = allel.read_vcf(input.vcf, region=(str(wildcards.CHROM))+':'+str(wildcards.POS1)+'-'+str(wildcards.POS2), fields=['calldata/GT','samples','variants/POS'])
-      # Generating genotype array
+      callset = allel.read_vcf(input.vcf, region=(str(wildcards.CHROM))+':'+str(wildcards.POS1)+'-'+str(wildcards.POS2), 
+                               fields=['variants/CHROM', 'calldata/GT','samples','variants/POS'])
+      chroms = callset['variants/CHROM']
+      positions = callset['variants/POS']
+       # Generating genotype array
       gt = allel.GenotypeArray(callset['calldata/GT'])
       # Filtering out particular population
       panel = pd.read_csv(input.popfile, sep='\t', usecols=['sample', 'pop', 'super_pop'])
       pop_check = (panel['pop']==wildcards.POP)
       pop_indices = panel[pop_check].index.values
-      pop_gt = gt.take(pop_indices,axis=1)
+      pop_gt = gt.take(pop_indices, axis=1)
       # Creating summed genotype matrix
-      a = pop_gt.to_n_alt()
+      gt_mat = pop_gt.to_n_alt()
+      _, nsamp = gt_mat.shape
+      # Calculate alt AF
+      alt_af = np.sum(gt_mat, axis=1)/(2*nsamp)
+      
+      # Filter this to only the sites that are polymorphic
+      idx_polymorphic = ((alt_af > 0) & (alt_af < 1))
+      alt_af_filt = alt_af[idx_polymorphic]
+      gt_mat_filt = gt_mat[idx_polymorphic,:]
+      nsnps_filt, nsamp_filt = gt_mat_filt.shape
+      
       # Empty list for arrays
       full_r2_list = []
       # Appending each array to list and saving
-      for i in range(a.shape[0]):
-            full_r2_list.append(adaptive_ld_mat_snp(a,i))
-      adaptive_arrays = np.array(full_r2_list)
-      np.savez_compressed(output.adaptive_ld_mat, adaptive_arrays=adaptive_arrays)
+      for i in tqdm(range(nsnps_filt)):
+        snp_r2_adaptive = adaptive_ld_mat_snp(gt_mat_filt, i)
+        full_r2_list.append(snp_r2_adaptive)
+      # Stack the array in a clever way
+      # NOTE : we still might have to think of a better way to stack
+      adaptive_ld_mat, idxs = stack_ragged(full_r2_list)
+      np.savez_compressed(output.adaptive_ld_mat,
+                          adaptive_ld_mat=adaptive_ld_mat, idx=idxs,
+                          chroms=chroms[idx_polymorphic], positions=positions[idx_polymorphic], alt_af = alt_af_filt)
         
 rule adaptive_ld_mats:
     input:
-        expand('data/performance_tests/adaptive_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz', CHROM=22, AC=5, POP=['CEU','CHB'],POS1=20000000, POS2=25000000)
+        expand('data/performance_tests/adaptive_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz', CHROM=22, AC=5, POP=['CEU'],POS1=20000000, POS2=25000000)
       
