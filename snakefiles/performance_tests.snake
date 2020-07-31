@@ -109,8 +109,8 @@ rule unfiltered_kxp_positions:
       
 rule gen_pop_kxp_matrix:
     input:
-       expand('data/performance_tests/chr{CHROM}_ac{AC}_K{K}_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU','FIN','CHB','YRI'], K=[100,200,500,1000,2500], CHROM=22, POS1=20000000, POS2=25000000),
-       expand('data/performance_tests/chr{CHROM}_ac{AC}_full_LD_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU','FIN','YRI','CHB'], CHROM=22, POS1=20000000, POS2=25000000),
+       expand('data/performance_tests/chr{CHROM}_ac{AC}_K{K}_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU','FIN','CHB','YRI','ASW','MXL'], K=[100,200,500,1000,2500], CHROM=22, POS1=20000000, POS2=25000000),
+       expand('data/performance_tests/chr{CHROM}_ac{AC}_full_LD_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU','FIN','YRI','CHB','ASW','MXL'], CHROM=22, POS1=20000000, POS2=25000000),
        expand('data/performance_tests/chr{CHROM}_ac{AC}_K{K}_pos{POS1}_{POS2}_unfiltered_pop{POP}.npz', AC=5, POP=['CEU'],K=[100,200,500,1000], CHROM=22, POS1=20000000, POS2=25000000)
          
 rule regional_full_LD_mat:
