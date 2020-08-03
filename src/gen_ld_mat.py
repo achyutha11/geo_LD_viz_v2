@@ -46,15 +46,6 @@ def running_mean(x, n):
   cumsum = np.nancumsum(x) 
   return (cumsum[n:] - cumsum[:-n]) / float(n)
 
-def stack_ragged(array_list, axis=0):
-  """
-    Method to stack ragged arrays while retaining
-    the indices
-  """
-  lengths = [np.shape(a)[axis] for a in array_list]
-  idx = np.cumsum(lengths[:-1])
-  stacked = np.concatenate(array_list, axis=axis)
-  return(stacked, idx)
 
 def adaptive_ld_mat_snp(gt, idx, eps=0.05, n=25, blen=100):
   """
