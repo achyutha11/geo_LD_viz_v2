@@ -78,5 +78,6 @@ def stack_ragged(array_list, axis=0):
   """
   lengths = [np.shape(a)[axis] for a in array_list]
   idx = np.cumsum(lengths[:-1])
+  idx = np.insert(idx,0,0)
   stacked = np.concatenate(array_list, axis=axis)
   return(stacked, idx)
