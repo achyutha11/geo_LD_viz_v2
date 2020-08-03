@@ -15,18 +15,22 @@ def kxp_convert(kxpmat):
   kxpmat : K x P matrix 
   """
 
-  # Define matrix of zeros
-  emp = np.zeros((kxpmat.shape[1],kxpmat.shape[1]))
-  
-  # Iterate through columns of matrix, appending each column from K x P 
-  for i in tqdm(range(kxpmat.shape[1])):
-      if i < kxpmat.shape[1]-kxpmat.shape[0]:     
-          emp[i+1:i+1+kxpmat[:,i].shape[0],i] = kxpmat[:,i]
-      # Accounting for edge cases
-      else:
-          emp[i+1:,i] = kxpmat[:,i][:kxpmat.shape[1]-i-1]
+    K,P = kxpmat.shape
+    assert(K > 1)
+    assert(P > K)
+    
+    # Create zeros matrix (nsnp x nsnp)
+    emp = np.zeros((P,P))
 
-  return emp
+    # Iterate through columns of K x P matrix, appending each to appropriate column in zeros matrix
+    for i in tqdm(range(P)):
+        if i < (P - K):     
+            emp[i+1:i+1+kxpmat[:,i].shape[0],i] = kxpmat[:,i]
+        # Accounting for edge cases
+        else:
+            emp[i+1:,i] = kxpmat[:,i][:kxpmat.shape[1]-i-1]
+    
+    return emp
 
 def ragged_convert(array_list,blen): 
     """
@@ -35,15 +39,19 @@ def ragged_convert(array_list,blen):
     array_list : List of arrays of different lengths
     blen : block length used to generate the list of arrays 
     """
+    assert(blen < len(array_list))
+    assert(len(array_list) > 1)
+    P = len(array_list)
+    
     # Creating empty matrix
-    mat = np.zeros((len(array_list),len(array_list)))
+    mat = np.zeros((P,P))
     
     # Iterating list of arrays and appending each list to appropriate position of P x P matrix
-    for i in tqdm(range(len(array_list))):
-        if i < len(array_list) - blen: 
-            if array_list[i].shape[0]>=blen:
+    for i in tqdm(range(P)):
+        if i < P - blen: 
+            if array_list[i].shape[0] >= blen:
                 mat[i+1:array_list[i].shape[0]+i+1,i] = array_list[i]
-            elif array_list[i].shape[0]==0:
+            elif array_list[i].shape[0] == 0:
                 continue
             elif array_list[i].shape[0] > 0 and array_list[i].shape[0] < blen:
                 sub_indices = []
@@ -61,3 +69,4 @@ def ragged_convert(array_list,blen):
         else:
             mat[i+1:array_list[i].shape[0]+i+1,i] = array_list[i]       
     return mat
+
