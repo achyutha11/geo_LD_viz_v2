@@ -27,7 +27,7 @@ def est_kxp_mat(gt_mat, pop_vec, pop, K=500):
     alt_af = alt_ac / (2*gt_pop_filt.shape[1])
     
     for i in tqdm(range(P)):
-        cur_corr = np.ma.corrcoef(gt_pop_filt[i,:],gt_pop_filt[i:(i+K),:])[0,:-1]
+        cur_corr = np.ma.corrcoef(gt_pop_filt[i,:],gt_pop_filt[i:(i+K),:])[0,1:-1]
         kxp_ld_mat[:cur_corr.shape[0],i] = cur_corr
     
     # Squaring the matrix to gen r^2
