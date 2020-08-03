@@ -9,11 +9,11 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 def kxp_convert(kxpmat):
-  """
-  Convert K x P matrix to P x P matrix where P is the number of SNPs
-  Argument:
-  kxpmat : K x P matrix 
-  """
+    """
+      Convert K x P matrix to P x P matrix where P is the number of SNPs
+      Argument:
+      kxpmat : K x P matrix 
+    """
 
     K,P = kxpmat.shape
     assert(K > 1)
@@ -72,12 +72,12 @@ def ragged_convert(array_list,blen):
 
 
 def stack_ragged(array_list, axis=0):
-  """
+    """
     Method to stack ragged arrays while retaining
     the indices
-  """
-  lengths = [np.shape(a)[axis] for a in array_list]
-  idx = np.cumsum(lengths[:-1])
-  idx = np.insert(idx,0,0)
-  stacked = np.concatenate(array_list, axis=axis)
-  return(stacked, idx)
+    """
+    lengths = [np.shape(a)[axis] for a in array_list]
+    idx = np.cumsum(lengths[:-1])
+    idx = np.insert(idx,0,0)
+    stacked = np.concatenate(array_list, axis=axis)
+    return(stacked, idx)
