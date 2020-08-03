@@ -165,7 +165,7 @@ rule adaptive_k_single_pop_chrom:
       adaptive_ld_mat = 'data/performance_tests/adaptive_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.npz'    
     run:
       # Reading in vcf
-      callset = allel.read_vcf(input.vcf, region=(str(wildcards.CHROM))+':'+str(wildcards.POS1)+'-'+str(wildcards.POS2), fields=['calldata/GT','samples','variants/POS'])
+      callset = allel.read_vcf(input.vcf, region=(str(wildcards.CHROM))+':'+str(wildcards.POS1)+'-'+str(wildcards.POS2), fields=['calldata/GT','samples','variants/POS','variants/CHROM'])
       chroms = callset['variants/CHROM']
       positions = callset['variants/POS']
       # Generating genotype array
