@@ -70,3 +70,13 @@ def ragged_convert(array_list,blen):
             mat[i+1:array_list[i].shape[0]+i+1,i] = array_list[i]       
     return mat
 
+
+def stack_ragged(array_list, axis=0):
+  """
+    Method to stack ragged arrays while retaining
+    the indices
+  """
+  lengths = [np.shape(a)[axis] for a in array_list]
+  idx = np.cumsum(lengths[:-1])
+  stacked = np.concatenate(array_list, axis=axis)
+  return(stacked, idx)
