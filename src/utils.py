@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 
 def kxp_convert(kxpmat):
     """
-      Convert K x P matrix to P x P matrix where P is the number of SNPs
-      Argument:
-      kxpmat : K x P matrix 
+    Convert K x P matrix to P x P matrix where P is the number of SNPs
+    Argument:
+    kxpmat : K x P matrix 
     """
 
     K,P = kxpmat.shape
@@ -31,6 +31,18 @@ def kxp_convert(kxpmat):
             emp[i+1:,i] = kxpmat[:,i][:kxpmat.shape[1]-i-1]
     
     return emp
+
+def kxp_file_convert(kxp_file):
+    """
+    Convert K x P file to P x P matrix where P is the number of SNPs
+    Argument:
+    kxp_file : K x P npz file path
+    """
+  
+    inter = np.load(kxp_file)
+    kxpmat = inter['ld_mat']
+    
+    return kxp_convert(kxpmat)
 
 def ragged_convert(array_list,blen): 
     """
