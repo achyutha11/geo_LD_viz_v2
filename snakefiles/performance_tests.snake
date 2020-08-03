@@ -177,7 +177,7 @@ rule adaptive_k_single_pop_chrom:
                                fields=['variants/CHROM', 'calldata/GT','samples','variants/POS'])
       chroms = callset['variants/CHROM']
       positions = callset['variants/POS']
-       # Generating genotype array
+      # Generating genotype array
       gt = allel.GenotypeArray(callset['calldata/GT'])
       # Filtering out particular population
       panel = pd.read_csv(input.popfile, sep='\t', usecols=['sample', 'pop', 'super_pop'])
@@ -203,7 +203,6 @@ rule adaptive_k_single_pop_chrom:
         snp_r2_adaptive = adaptive_ld_mat_snp(gt_mat_filt, i)
         full_r2_list.append(snp_r2_adaptive)
       # Stack the array in a clever way
-      # NOTE : we still might have to think of a better way to stack
       adaptive_ld_mat, idxs = stack_ragged(full_r2_list)
       np.savez_compressed(output.adaptive_ld_mat,
                           adaptive_ld_mat=adaptive_ld_mat, idx=idxs,

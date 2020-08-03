@@ -7,6 +7,7 @@
 
 import numpy as np
 from tqdm import tqdm
+import copy
 import matplotlib.pyplot as plt
 
 def frac_covered_k_banded(full_ld_mat, kxp_mat, epsilon=1e-2):
@@ -83,13 +84,40 @@ def frac_covered_adaptive(full_ld_mat, adaptive_ld_mat, idx_adaptive, epsilon=1e
   assert(tot_adaptive/tot_full <= 1.0)
   return(tot_adaptive / tot_full)
   
-
   
+    
+def frac_cov_k_band_true_r2(R2_true, k=-2, epsilon=1e-2):
+  """
+    Calculating the fraction of relevant entries kept 
+    after setting a band lower K to all 0's
+    
+    Arguments:
+      R2_true: an n x n matrix of the 
+      k: the band below which you want to set all entries to be < 0.0
+      epsilon: the lower threshold for r2 detection
+  """
+  n, _ = R2_true.shape
+  assert(k < -1)
+  assert(n > 3)
+  assert((epsilon > 0) & (epsilon <= 1.0))
+  x_tril, y_tril = np.tril_indices(n, k=-1)
+  x_tril_k, y_tril_k = np.tril_indices(n, k=k)
+  R2_x = np.tril(R2_true,k=-1)
+  R2_copy = copy.deepcopy(R2_x)
+  # Setting the lower elements as 0
+  R2_copy[x_tril_k, y_tril_k] = 0.0
+  nonzero_r2 = R2_x[R2_x > 0.0]
+  nonzero_r2_filt = R2_copy[R2_copy > 0.0]
+  frac = np.sum(nonzero_r2_filt > epsilon) / np.sum(nonzero_r2 > 0.)
+  return(frac)
+  
+
 def corrcoef_PxP(R2_true, R2_inf):
   """
-    Calculating the correlation coefficient between the lower-triangular entries of an LD matrix
+    Calculating the correlation coefficient between the lower-triangular entries of an LD matrix and an inferred LD matrix
     Arguments:
-      R2_true 
+      R2_true : n x n sample LD matrix 
+      R2_inf : n x n  inferred LD matrix 
   """
   n, _ = R2_true.shape
   n_inf, _ = R2_inf.shape
