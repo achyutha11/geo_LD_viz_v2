@@ -8,16 +8,12 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-def kxp_convert(kxp_file):
+def kxp_convert(kxpmat):
   """
   Convert K x P matrix to P x P matrix where P is the number of SNPs
   Argument:
-  kxp_file : K x P npz file path
+  kxpmat : K x P matrix 
   """
-  
-  # Load in K x P matrix
-  load = np.load(kxp_file)
-  kxpmat = load['ld_mat']
 
   # Define matrix of zeros
   emp = np.zeros((kxpmat.shape[1],kxpmat.shape[1]))
