@@ -74,7 +74,10 @@ def adaptive_ld_mat_snp(gt, idx, eps=0.05, n=25, blen=100):
     # Check if any entry in the moving average is < eps
     if np.any(cur_mean_r2 <= eps):
       going = False
-  # Convert to an array - note - this is deprecated 
-  r2_vec_tot = np.array(r2_vec_tot).flatten()
+  # Convert to an array - with a fix to error correct the last couple 
+  if len(r2_vec_tot) > 1:
+    r2_vec_tot = np.concatenate(r2_vec_tot).flatten()
+  else:
+    r2_vec_tot = np.array(r2_vec_tot).flatten()
   return(r2_vec_tot)
       

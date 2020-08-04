@@ -202,6 +202,9 @@ rule adaptive_k_single_pop_chrom:
       for i in tqdm(range(nsnps_filt)):
         snp_r2_adaptive = adaptive_ld_mat_snp(gt_mat_filt, i)
         full_r2_list.append(snp_r2_adaptive)
+      # Check the dimension of these arrays to make sure they are all 1-d
+      dims = np.array([x.ndim for x in full_r2_list])
+      assert(np.all(dims == 1))
       # Stack the array in a clever way
       adaptive_ld_mat, idxs = stack_ragged(full_r2_list)
       np.savez_compressed(output.adaptive_ld_mat,
