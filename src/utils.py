@@ -51,7 +51,7 @@ def ragged_convert(array_list,blen):
     array_list : List of adaptive-K arrays
     blen : Block length used in the function to generate adaptive arrays
     """
-    
+   
     assert(blen < len(array_list))
     assert(len(array_list) > 1)
     P = len(array_list) 
@@ -92,7 +92,6 @@ def adaptive_file_convert(adaptive_file,blen):
     inter = np.load(adaptive_file)
     adaptive_mat = inter['adaptive_ld_mat']
     idxs = inter['idx']
-    
     
     array_list = []
     
