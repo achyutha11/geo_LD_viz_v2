@@ -44,48 +44,24 @@ def kxp_file_convert(kxp_file):
     
     return kxp_convert(kxpmat)
 
-def ragged_convert(array_list,blen):
+def ragged_convert(array_list):
     """
-    Convert list of adaptive-K arrays to P x P matrix where P is the number of SNPs
-    Arguments:
-    array_list : List of adaptive-K arrays
-    blen : Block length used in the function to generate adaptive arrays
+        Convert the list of arrays to a P x P LD matrix
     """
-   
-    assert(blen < len(array_list))
-    assert(len(array_list) > 1)
-    P = len(array_list) 
-    
-    # Creating empty matrix
-    mat = np.zeros((P+1,P+1))
-    
-    # Iterating list of arrays and appending each list to appropriate position of P x P matrix
-    for i in tqdm(range(P)):
-        if i < P - blen: 
-            if array_list[i].shape[0] >= blen:
-                mat[i+1:array_list[i].shape[0]+i+1,i] = array_list[i]
-            elif array_list[i].shape[0] == 0:
-                continue
-            elif array_list[i].shape[0] > 0 and array_list[i].shape[0] < blen:
-                if all(array_list[i][m].shape[0]%blen==0 for m in list(range(array_list[i].shape[0]))):
-                    index = array_list[i].shape[0]*blen
-                    mat[i+1:index+i+1,i] = np.concatenate(array_list[i]) 
-                else:
-                    lengths = []
-                    for k in range(array_list[i].shape[0]):
-                        lengths.append(array_list[i][k].shape[0])
-                    index = sum(lengths)
-                    mat[i+1:index+i+1,i] = np.concatenate(array_list[i]) 
-        else:
-            mat[i+1:array_list[i].shape[0]+i+1,i] = array_list[i]       
-    return mat
-
-def adaptive_file_convert(adaptive_file,blen):
+    p =  len(array_list)
+    ld_mat = np.zeros(shape=(p,p), dtype=np.float32)
+    for i in tqdm(range(p)):
+        cur_vec = array_list[i]
+        ix = i + 1
+        l = cur_vec.size
+        ld_mat[ix:(ix+l),i] = cur_vec
+    return(ld_mat)  
+  
+def adaptive_file_convert(adaptive_file):
     """
     Convert adaptive-K file to P x P matrix where P is the number of SNPs
     Arguments:
-    adaptive_file : Npz file containing adaptive array and indices of array endpoints
-    blen : Block length used in the function to generate adaptive arrays
+      adaptive_file : Npz file containing adaptive array and indices of array endpoints
     """
     
     # Load in concatenated adaptive array and indices of array endpoints
@@ -100,9 +76,8 @@ def adaptive_file_convert(adaptive_file,blen):
         array_list.append(adaptive_ld_mat[idxs[i]:idxs[i+1]])
     
     # Convert list of arrays to P x P matrix
-    return ragged_convert(array_list,blen)
- 
-
+    return ragged_convert(array_list)
+  
 def stack_ragged(array_list, axis=0):
     """
     Method to stack ragged arrays while retaining
