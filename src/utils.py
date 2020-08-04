@@ -73,7 +73,7 @@ def adaptive_file_convert(adaptive_file):
     
     # Create list of arrays using endpoints from idxs
     for i in tqdm(range(idxs.size-1)):
-        array_list.append(adaptive_ld_mat[idxs[i]:idxs[i+1]])
+        array_list.append(adaptive_mat[idxs[i]:idxs[i+1]])
     
     # Convert list of arrays to P x P matrix
     return ragged_convert(array_list)
