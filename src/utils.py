@@ -89,7 +89,7 @@ def adaptive_file_convert(adaptive_file,blen):
     """
     
     # Load in concatenated adaptive array and indices of array endpoints
-    inter = np.load(adaptive_file)
+    inter = np.load(adaptive_file, allow_pickle=True)
     adaptive_mat = inter['adaptive_ld_mat']
     idxs = inter['idx']
     
