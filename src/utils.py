@@ -25,10 +25,10 @@ def kxp_convert(kxpmat):
     # Iterate through columns of K x P matrix, appending each to appropriate column in zeros matrix
     for i in tqdm(range(P)):
         if i < (P - K):     
-            emp[i+1:i+1+kxpmat[:,i].shape[0],i] = kxpmat[:,i]
+            emp[i+1:i+1+kxpmat[1:,i].shape[0],i] = kxpmat[1:,i]
         # Accounting for edge cases
         else:
-            emp[i+1:,i] = kxpmat[:,i][:kxpmat.shape[1]-i-1]
+            emp[i+1:,i] = kxpmat[1:,i][:kxpmat.shape[1]-i-1]
     
     return emp
 
@@ -97,7 +97,7 @@ def adaptive_file_convert(adaptive_file,blen):
     
     # Create list of arrays using endpoints from idxs
     for i in tqdm(range(idxs.size-1)):
-    array_list.append(adaptive_ld_mat[idxs[i]:idxs[i+1]])
+        array_list.append(adaptive_ld_mat[idxs[i]:idxs[i+1]])
     
     # Convert list of arrays to P x P matrix
     return ragged_convert(array_list,blen)
