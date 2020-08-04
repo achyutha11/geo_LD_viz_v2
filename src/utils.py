@@ -25,7 +25,7 @@ def kxp_convert(kxpmat):
     # Iterate through columns of K x P matrix, appending each to appropriate column in zeros matrix
     for i in tqdm(range(P)):
         if i < (P - K):     
-            emp[i+1:i+1+kxpmat[1:,i].shape[0],i] = kxpmat[1:,i]
+            emp[i+1:i+1+kxpmat[2:,i].shape[0],i] = kxpmat[2:,i]
         # Accounting for edge cases
         else:
             emp[i+1:,i] = kxpmat[1:,i][:kxpmat.shape[1]-i-1]
