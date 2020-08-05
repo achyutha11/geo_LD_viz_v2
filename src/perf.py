@@ -108,7 +108,7 @@ def frac_cov_k_band_true_r2(R2_true, k=-2, epsilon=1e-2):
   R2_copy[x_tril_k, y_tril_k] = 0.0
   nonzero_r2 = R2_x[R2_x > 0.0]
   nonzero_r2_filt = R2_copy[R2_copy > 0.0]
-  frac = np.sum(nonzero_r2_filt > epsilon) / np.sum(nonzero_r2 > epsilon)
+  frac = np.sum(nonzero_r2_filt > epsilon) / np.sum(nonzero_r2 > 0.)
   return(frac)
   
 
