@@ -49,7 +49,7 @@ def ragged_convert(array_list):
         Convert the list of arrays to a P x P LD matrix
     """
     p =  len(array_list)
-    ld_mat = np.zeros(shape=(p,p), dtype=np.float32)
+    ld_mat = np.zeros(shape=(p+1,p+1), dtype=np.float32)
     for i in tqdm(range(p)):
         cur_vec = array_list[i]
         ix = i + 1
