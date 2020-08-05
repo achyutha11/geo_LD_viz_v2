@@ -14,6 +14,8 @@ import sys
 sys.path.append('src/')
 from scipy.spatial.distance import squareform
 from gen_ld_mat import *
+from utils import *
+from perf import *
 
 # ------- Data Directories ------ # 
 DATA_DIR  = '/project2/jnovembre/data/external_public/geo_LD/'
