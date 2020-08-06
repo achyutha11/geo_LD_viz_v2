@@ -207,7 +207,7 @@ rule adaptive_k_single_pop_chrom:
       # Check the dimension of these arrays to make sure they are all 1-d
       dims = np.array([x.ndim for x in full_r2_list])
       assert(np.all(dims == 1))
-      variables = np.array([(int(wildcards.EPS)/1000),(int(wildcards.N),(int(wildcards.BLEN))]
+      variables = np.array([(int(wildcards.EPS)/1000),(int(wildcards.N),(int(wildcards.BLEN))])
       # Stack the array in a clever way
       adaptive_ld_mat, idxs = stack_ragged(full_r2_list)
       np.savez_compressed(output.adaptive_ld_mat,
