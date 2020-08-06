@@ -109,7 +109,7 @@ def frac_cov_k_band_true_r2(R2_true, k=-2, epsilon=1e-2):
   nonzero_r2 = R2_x[R2_x > 0.0]
   nonzero_r2_filt = R2_copy[R2_copy > 0.0]
   frac = np.sum(nonzero_r2_filt > epsilon) / np.sum(nonzero_r2 > epsilon)
-  return(frac)
+  return(frac, nonzero_r2_filt.shape[0])
   
 
 def corrcoef_PxP(R2_true, R2_inf):
