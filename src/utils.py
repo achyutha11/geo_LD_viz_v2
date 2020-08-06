@@ -68,6 +68,7 @@ def adaptive_file_convert(adaptive_file):
     inter = np.load(adaptive_file, allow_pickle=True)
     adaptive_mat = inter['adaptive_ld_mat']
     idxs = inter['idx']
+    variables = inter['variables']
     idxs = np.insert(idxs,0,0)
 
     array_list = []
@@ -77,7 +78,7 @@ def adaptive_file_convert(adaptive_file):
         array_list.append(adaptive_mat[idxs[i]:idxs[i+1]])
     
     # Convert list of arrays to P x P matrix
-    return ragged_convert(array_list)
+    return (ragged_convert(array_list),variables)
   
 def stack_ragged(array_list, axis=0):
     """
