@@ -202,7 +202,7 @@ rule adaptive_k_single_pop_chrom:
       full_r2_list = []
       # Appending each array to list and saving
       for i in tqdm(range(nsnps_filt)):
-        snp_r2_adaptive = adaptive_ld_mat_snp(gt_mat_filt, i,wildcards.EPS/1000,wilcards.N,wildcards.BLEN)
+        snp_r2_adaptive = adaptive_ld_mat_snp(gt_mat_filt, i,int(wildcards.EPS)/1000,wilcards.N,wildcards.BLEN)
         full_r2_list.append(snp_r2_adaptive)
       # Check the dimension of these arrays to make sure they are all 1-d
       dims = np.array([x.ndim for x in full_r2_list])
