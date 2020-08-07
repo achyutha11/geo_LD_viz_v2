@@ -226,7 +226,7 @@ rule adaptive_perf_csv:
        variables for the adaptive arrays from a particular region for a given population
     """
     input:
-      adaptive = [glob.glob('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/*'+str(wildcards.AC)+'_pos'+str(wildcards.POS1)+'_'+str(wildcards.POS2)+'_pop'+str(wildcards.POP)+'.npz')] 
+      adaptive = [glob.glob('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/*'+str(wildcards.AC)+'_pos'+str(wildcards.POS1)+'_'+str(wildcards.POS2)+'_pop'+str(wildcards.POP)+'.npz')], 
       full = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/ld_mats_perf/chr'+str(wildcards.CHROM)+'_ac'+str(wildcards.AC)+'_full_LD_pos'+str(wildcards.POS1)+'_'+str(wildcards.POS2)+'_pop'+str(wildcards.POP)+'.npz'
     output:
       csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.csv'
@@ -234,7 +234,7 @@ rule adaptive_perf_csv:
       with open(output.csv,'w',newline='') as file:
         writer = csv.writer(file)
         writer.writerow(["eps_thresh", "n", "blen",'eps_r2','adaptive > eps','true > eps','adaptive_total','true_total'])
-      load = np.load(filepath)
+      load = np.load(input.full)
       mat = load['ld_mat']
       mat_sample = mat[:5000,:5000]
       for i in input.adaptive[0]:
