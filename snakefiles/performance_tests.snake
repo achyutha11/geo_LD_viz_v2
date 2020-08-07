@@ -222,6 +222,10 @@ rule adaptive_ld_mats:
 def adaptive_perf_inputs(wildcards):
     files = [glob.glob('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/*'+str(wildcards.AC)+'_pos'+str(wildcards.POS1)+'_'+str(wildcards.POS2)+'_pop'+str(wildcards.POP)+'.npz')]
     return files
+
+def full_perf_input(wildcards):
+    files = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/ld_mats_perf/chr'+str(wildcards.CHROM)+'_ac'+str(wildcards.AC)+'_full_LD_pos'+str(wildcards.POS1)+'_'+str(wildcards.POS2)+'_pop'+str(wildcards.POP)+'.npz'
+    return files
         
 rule adaptive_perf_csv:
     """
@@ -230,7 +234,7 @@ rule adaptive_perf_csv:
     """
     input:
       adaptive = adaptive_perf_inputs, 
-      full = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/ld_mats_perf/chr'+str(wildcards.CHROM)+'_ac'+str(wildcards.AC)+'_full_LD_pos'+str(wildcards.POS1)+'_'+str(wildcards.POS2)+'_pop'+str(wildcards.POP)+'.npz'
+      full = full_perf_input
     output:
       csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.csv'
     run:
