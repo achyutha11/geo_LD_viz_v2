@@ -248,7 +248,7 @@ rule adaptive_perf_csv:
         writer.writerow(["eps_thresh", "n", "blen",'eps_r2','adaptive > eps','true > eps','adaptive_total','true_total'])
       load = np.load(input.full)
       mat = load['ld_mat']
-      mat_sample = mat[:5000,:5000]
+      mat_sample = mat[:,:]
       for i in input.adaptive:
         adaptive_load = adaptive_file_convert(i)
         eps_list = [0.1,0.25,0.5,0.8]
