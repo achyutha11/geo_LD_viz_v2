@@ -236,7 +236,8 @@ rule adaptive_perf_csv:
     input:
       adaptive = expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_chr{chrom}_eps{eps}_N{N}_blen{blen}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz',
                         chrom=22,eps=[50,100,500,1000],N=[25,50],blen=[100,250,500],AC=5,POS1=20000000,POS2=25000000,POP=['CEU']), 
-      full = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/ld_mats_perf/chr'+str(wildcards.CHROM)+'_ac{AC}'+str(wildcards.AC)+'_full_LD_pos'+str(wildcards.POS1)+'_'+str(wildcards.POS2)+'_pop'+str(wildcards.POP)+'.npz'
+      full = expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/ld_mats_perf/chr{CHROM}_ac{AC}_full_LD_pos{POS1}_{POS2}_pop{POP}.npz',
+                    CHROM=22,AC=5,POS1=20000000,POS2=25000000,POP=['CEU'])
     output:
       csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.csv'
     run:
