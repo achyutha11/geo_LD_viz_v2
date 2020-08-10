@@ -153,5 +153,6 @@ def perf_adaptive(R2_true,converted_adaptive_file,epsilon):
   R2_x = np.tril(R2_true,k=-1)
   nonzero_r2_true = R2_x[R2_x > 0.0]
   nonzero_r2_adaptive = mat[mat > 0.0]
+  corrcoef = corrcoef_PxP(R2_true,mat)
   return (eps_adapt,n_adapt,blen_adapt,epsilon,np.sum(nonzero_r2_adaptive > epsilon),np.sum(nonzero_r2_true > epsilon),
-            np.count_nonzero(nonzero_r2_adaptive),np.count_nonzero(nonzero_r2_true))
+            np.count_nonzero(nonzero_r2_adaptive),np.count_nonzero(nonzero_r2_true),corrcoef)
