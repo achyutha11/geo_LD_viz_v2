@@ -43,5 +43,14 @@
       "err": "log/{rule}-%j.err",
       "partition": "jnovembre",
       "ncores": "1"
+	},
+	"adaptive_perf_csv":
+	{
+      "time" : "12:00:00",
+      "mem": "20G",
+      "out": "log/{rule}-%j.out",
+      "err": "log/{rule}-%j.err",
+      "partition": "jnovembre",
+      "ncores": "1"
 	}
 }
