@@ -238,12 +238,9 @@ rule adaptive_perf_csv:
        variables for the adaptive arrays from a particular region for a given population
     """
     input:
-      adaptive = rules.adaptive_k_single_pop_chrom.output.adaptive_ld_mat,
-      #adaptive = expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_chr{CHROM}_eps{EPS}_N{N}_blen{BLEN}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz',
-      #                  CHROM=22,EPS=eps_list,N=N_list,BLEN=blen_list,AC=5,POS1=20000000,POS2=25000000,POP=['CEU']),
-      #full = expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/ld_mats_perf/chr{CHROM}_ac{AC}_full_LD_pos{POS1}_{POS2}_pop{POP}.npz',
-      #              CHROM=22,AC=5,POS1=20000000,POS2=25000000,POP=['CEU'])
-      full = rules.regional_full_LD_mat.output.ld_mat
+      adaptive = expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_chr{CHROM}_eps{EPS}_N{N}_blen{BLEN}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz',
+                        CHROM=22,EPS=eps_list,N=N_list,BLEN=blen_list,AC=5,POS1=20000000,POS2=25000000,POP=['CEU']),
+      full = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/ld_mats_perf/chr22_ac5_full_LD_pos20000000_25000000_popCEU.npz'
     output:
       csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.csv'
     run:
