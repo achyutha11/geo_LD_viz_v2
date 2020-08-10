@@ -51,7 +51,7 @@ rule regional_full_LD_mat:
       vcf = rules.filt_biallelic_AC_1kg.output.vcf,
       popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel' 
     output:
-      ld_mat = 'data/performance_tests/chr{CHROM}_ac{AC,\d+}_full_LD_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.npz'
+      ld_mat = 'data/ld_mats_perf/chr{CHROM}_ac{AC,\d+}_full_LD_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.npz'
     run:
        # Reading in vcf 
        callset = allel.read_vcf(input.vcf, region=(str(wildcards.CHROM))+':'+str(wildcards.POS1)+'-'+str(wildcards.POS2), fields=['calldata/GT','samples','variants/POS'])
@@ -86,7 +86,7 @@ rule regional_full_LD_mat:
 
 rule gen_full_LD_mat:
   input:
-    expand('data/performance_tests/chr{CHROM}_ac{AC}_full_LD_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU'], CHROM=22, POS1=25000000, POS2=30000000),        
+    expand('data/ld_mats_perf/chr{CHROM}_ac{AC}_full_LD_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU'], CHROM=22, POS1=25000000, POS2=30000000),        
         
       
 # ----------------- K x P Analysis --------------------- # 
