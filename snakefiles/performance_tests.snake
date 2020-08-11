@@ -163,7 +163,7 @@ rule unfiltered_kxp_positions:
       
 rule gen_pop_kxp_matrix:
   input:
-    expand('data/performance_tests/chr{CHROM}_ac{AC}_K{K}_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU'], K=[100,200,500,1000], CHROM=22, POS1=20000000, POS2=25000000),
+    expand('data/performance_tests/chr{CHROM}_ac{AC}_K{K}_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU'], K=[100,200,326,500,1000], CHROM=22, POS1=20000000, POS2=25000000),
 
         
 rule adaptive_k_single_pop_chrom:
