@@ -47,7 +47,7 @@
 	"adaptive_perf_csv":
 	{
       "time" : "12:00:00",
-      "mem": "20G",
+      "mem": "30G",
       "out": "log/{rule}-%j.out",
       "err": "log/{rule}-%j.err",
       "partition": "jnovembre",
