@@ -218,7 +218,7 @@ rule adaptive_k_single_pop_chrom:
         
 rule adaptive_ld_mats:
     input:
-        expand('data/performance_tests/adaptive_chr{CHROM}_eps{EPS}_N{N}_blen{BLEN}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz', CHROM=22, AC=5, POP=['CEU','CHB','YRI','FIN','ASW','MXL'],POS1=17000000, POS2=20000000, EPS=[10,100,1000],N=[25,50],BLEN=[100,250,500])
+        expand('data/performance_tests/adaptive_chr{CHROM}_eps{EPS}_N{N}_blen{BLEN}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz', CHROM=22, AC=5, POP=['CEU','CHB','YRI','FIN','ASW','MXL'],POS1=25000000, POS2=28000000, EPS=[10,100,1000],N=[25,50],BLEN=[100,250,500])
         
 
 eps_list = [10,100,1000]
@@ -273,5 +273,7 @@ rule adaptive_csv_gen:
 #    output:
 #      meta_csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_meta.csv'
 #    run:
+      
+
       
       
