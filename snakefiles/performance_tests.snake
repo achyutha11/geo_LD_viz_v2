@@ -209,7 +209,7 @@ rule adaptive_k_single_pop_chrom:
       # Check the dimension of these arrays to make sure they are all 1-d
       dims = np.array([x.ndim for x in full_r2_list])
       assert(np.all(dims == 1))
-      variables = np.array([(int(wildcards.EPS)/10000),(int(wildcards.N)),(int(wildcards.BLEN))])
+      variables = np.array([(str(wildcards.POP)),(str(wildcards.POS1)+"-"+str(wildcards.POS2)),(int(wildcards.EPS)/10000),(int(wildcards.N)),(int(wildcards.BLEN))])
       # Stack the array in a clever way
       adaptive_ld_mat, idxs = stack_ragged(full_r2_list)
       np.savez_compressed(output.adaptive_ld_mat,
@@ -229,6 +229,7 @@ ac = 5
 pos1 = 17000000
 pos2 = 20000000
 pop = 'CEU'
+poplist = ['CEU','CHB','YRI','FIN','MXL','ASW']
 
         
 rule adaptive_perf_csv:
@@ -248,14 +249,13 @@ rule adaptive_perf_csv:
         writer.writerow(["eps_thresh", "n", "blen",'eps_r2','adaptive > eps','true > eps','adaptive_total','true_total','corrcoef'])
       load = np.load(input.full)
       mat = load['ld_mat']
-      mat_sample = mat[:,:]
       for i in input.adaptive:
         adaptive_load = adaptive_file_convert(i)
         eps_list = [0.1,0.25,0.5,0.8]
         for j in eps_list:
             with open(output.csv,'a+',newline='') as file:
                 writer = csv.writer(file)
-                writer.writerow(perf_adaptive(mat_sample,adaptive_load,j))
+                writer.writerow(perf_adaptive(mat,adaptive_load,j))
                 
                 
 rule adaptive_csv_gen:
@@ -269,21 +269,9 @@ rule merge_regional_csv:
     """
     input:
       csv_list = expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.csv',
-                        CHROM=22,EPS=eps_list,N=N_list,BLEN=blen_list,AC=5,POS1=17000000,POS2=20000000,POP='CEU'),
+                        CHROM=22,AC=5,POS1=17000000,POS2=20000000,POP=poplist),
     output:
-      csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.csv'
+      meta_csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_meta.csv'
     run:
-      with open(output.csv,'w',newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(["eps_thresh", "n", "blen",'eps_r2','adaptive > eps','true > eps','adaptive_total','true_total','corrcoef'])
-      load = np.load(input.full)
-      mat = load['ld_mat']
-      mat_sample = mat[:,:]
-      for i in input.adaptive:
-        adaptive_load = adaptive_file_convert(i)
-        eps_list = [0.1,0.25,0.5,0.8]
-        for j in eps_list:
-            with open(output.csv,'a+',newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow(perf_adaptive(mat_sample,adaptive_load,j))
+      
       
