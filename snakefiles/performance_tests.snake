@@ -218,7 +218,7 @@ rule adaptive_k_single_pop_chrom:
         
 rule adaptive_ld_mats:
     input:
-        expand('data/performance_tests/adaptive_chr{CHROM}_eps{EPS}_N{N}_blen{BLEN}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz', CHROM=22, AC=5, POP=['CEU','CHB','YRI','FIN','ASW','MXL'],POS1=25000000, POS2=28000000, EPS=[10,100,1000],N=[25,50],BLEN=[100,250,500])
+        expand('data/performance_tests/adaptive_chr{CHROM}_eps{EPS}_N{N}_blen{BLEN}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz', CHROM=22, AC=5, POP=['CEU','CHB','YRI','FIN','ASW','MXL'],POS1=33000000, POS2=36000000, EPS=[10,100,1000],N=[25,50],BLEN=[100,250,500])
         
 
 eps_list = [10,100,1000]
@@ -263,5 +263,27 @@ rule adaptive_csv_gen:
         expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.csv', CHROM=22, AC=5, POP='CEU',POS1=17000000, POS2=20000000, EPS=[10,100,1000],N=[25,50],BLEN=[100,250,500])
         
     
-    
+rule merge_regional_csv:
+    """
+       Generate a meta csv file containing all population data for a particular region of a chromosome 
+    """
+    input:
+      csv_list = expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.csv',
+                        CHROM=22,EPS=eps_list,N=N_list,BLEN=blen_list,AC=5,POS1=17000000,POS2=20000000,POP='CEU'),
+    output:
+      csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.csv'
+    run:
+      with open(output.csv,'w',newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["eps_thresh", "n", "blen",'eps_r2','adaptive > eps','true > eps','adaptive_total','true_total','corrcoef'])
+      load = np.load(input.full)
+      mat = load['ld_mat']
+      mat_sample = mat[:,:]
+      for i in input.adaptive:
+        adaptive_load = adaptive_file_convert(i)
+        eps_list = [0.1,0.25,0.5,0.8]
+        for j in eps_list:
+            with open(output.csv,'a+',newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(perf_adaptive(mat_sample,adaptive_load,j))
       
