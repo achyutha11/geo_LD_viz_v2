@@ -218,7 +218,7 @@ rule adaptive_k_single_pop_chrom:
         
 rule adaptive_ld_mats:
     input:
-        expand('data/performance_tests/adaptive_chr{CHROM}_eps{EPS}_N{N}_blen{BLEN}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz', CHROM=22, AC=5, POP=['CEU','CHB','YRI','FIN','ASW','MXL'],POS1=25000000, POS2=28000000, EPS=[10,100,1000],N=[25,50],BLEN=[100,250,500])
+        expand('data/performance_tests/adaptive_chr{CHROM}_eps{EPS}_N{N}_blen{BLEN}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz', CHROM=22, AC=5, POP=['CEU','CHB','YRI','FIN','ASW','MXL'],POS1=33000000, POS2=36000000, EPS=[10,100,1000],N=[25,50],BLEN=[100,250,500])
         
 
 eps_list = [10,100,1000]
@@ -263,17 +263,22 @@ rule adaptive_csv_gen:
         expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.csv', CHROM=22, AC=5, POP='CEU',POS1=17000000, POS2=20000000, EPS=[10,100,1000],N=[25,50],BLEN=[100,250,500])
         
     
-#rule merge_regional_csv:
-#    """
-#       Generate a meta csv file containing all population data for a particular region of a chromosome 
-#    """
-#    input:
-#      csv_list = expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.csv',
-#                        CHROM=22,AC=5,POS1=17000000,POS2=20000000,POP=poplist),
-#    output:
-#      meta_csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_meta.csv'
-#    run:
+rule merge_regional_csv:
+    """
+       Generate a meta csv file containing all population data for a particular region of a chromosome 
+    """
+    input:
+      csv_list = expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.csv',
+                        CHROM=22,AC=5,POS1=17000000,POS2=20000000,POP=poplist),
+    output:
+      meta_csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_meta.csv'
+    run:
+      merge_csv = pd.concat([pd.read_csv(i) for i in input.csv_list])
+      merge_csv.to_csv(output.meta_csv)
       
-
+rule meta_csv_gen:
+    input:
+        expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_meta.csv', CHROM=22, AC=5, POP='CEU',POS1=17000000, POS2=20000000)
+        
       
       
