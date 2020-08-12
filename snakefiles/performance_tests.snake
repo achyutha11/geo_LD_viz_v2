@@ -246,7 +246,7 @@ rule adaptive_perf_csv:
     run:
       with open(output.csv,'w',newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(["eps_thresh", "n", "blen",'eps_r2','adaptive > eps','true > eps','adaptive_total','true_total','corrcoef'])
+        writer.writerow(["pop","region","eps_thresh", "n", "blen",'eps_r2','adaptive > eps','true > eps','adaptive_total','true_total','corrcoef'])
       load = np.load(input.full)
       mat = load['ld_mat']
       for i in input.adaptive:
