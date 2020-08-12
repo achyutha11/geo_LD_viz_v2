@@ -226,8 +226,8 @@ N_list = [25,50]
 blen_list = [100,250,500]
 chrom = 22
 ac = 5
-pos1 = 17000000
-pos2 = 20000000
+pos1 = 25000000
+pos2 = 28000000
 pop = 'CEU'
 poplist = ['CEU','CHB','YRI','FIN','MXL','ASW']
 
@@ -239,7 +239,7 @@ rule adaptive_perf_csv:
     """
     input:
       adaptive = expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_chr{CHROM}_eps{EPS}_N{N}_blen{BLEN}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz',
-                        CHROM=22,EPS=eps_list,N=N_list,BLEN=blen_list,AC=5,POS1=17000000,POS2=20000000,POP='CEU'),
+                        CHROM=22,EPS=eps_list,N=N_list,BLEN=blen_list,AC=5,POS1=25000000,POS2=28000000,POP='CEU'),
       full = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/ld_mats_perf/chr'+str(chrom)+'_ac'+str(ac)+'_full_LD_pos'+str(pos1)+'_'+str(pos2)+'_pop'+str(pop)+'.npz'
     output:
       csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.csv'
@@ -260,7 +260,7 @@ rule adaptive_perf_csv:
                 
 rule adaptive_csv_gen:
     input:
-        expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.csv', CHROM=22, AC=5, POP='CEU',POS1=17000000, POS2=20000000, EPS=[10,100,1000],N=[25,50],BLEN=[100,250,500])
+        expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.csv', CHROM=22, AC=5, POP='CEU',POS1=25000000, POS2=28000000, EPS=[10,100,1000],N=[25,50],BLEN=[100,250,500])
         
     
 rule merge_regional_csv:
