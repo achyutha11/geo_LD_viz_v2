@@ -278,7 +278,7 @@ rule merge_regional_csv:
       
 rule meta_csv_gen:
     input:
-        expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_meta.csv', CHROM=22, AC=5, POP='CEU',POS1=17000000, POS2=20000000)
+        expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_meta.csv', CHROM=22, AC=5, POP='CEU',POS1=17000000, POS2=20000000)
         
       
       
