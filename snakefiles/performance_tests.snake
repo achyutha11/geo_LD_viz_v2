@@ -243,6 +243,8 @@ rule adaptive_perf_csv:
       full = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/ld_mats_perf/chr'+str(chrom)+'_ac'+str(ac)+'_full_LD_pos'+str(pos1)+'_'+str(pos2)+'_pop'+str(pop)+'.npz'
     output:
       csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.csv'
+    benchmark:
+      "log/{CHROM}_{AC,\d+}_{POS1,\d+}_{POS2,\d+}_{POP}.adaptive_csv.benchmark.txt"
     run:
       with open(output.csv,'w',newline='') as file:
         writer = csv.writer(file)
