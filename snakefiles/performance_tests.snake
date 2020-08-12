@@ -86,7 +86,7 @@ rule regional_full_LD_mat:
 
 rule gen_full_LD_mat:
   input:
-    expand('data/ld_mats_perf/chr{CHROM}_ac{AC}_full_LD_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU','YRI','CHB','FIN','MXL','ASW'], CHROM=22, POS1=25000000, POS2=28000000),        
+    expand('data/ld_mats_perf/chr{CHROM}_ac{AC}_full_LD_pos{POS1}_{POS2}_pop{POP}.npz', AC=5, POP=['CEU','YRI','CHB','FIN','MXL','ASW'], CHROM=22, POS1=33000000, POS2=36000000),        
         
       
 # ----------------- K x P Analysis --------------------- # 
