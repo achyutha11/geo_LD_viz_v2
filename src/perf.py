@@ -142,9 +142,11 @@ def perf_adaptive(R2_true,converted_adaptive_file,epsilon):
     epsilon = r2 threshold for performance testing
   """
   assert(len(converted_adaptive_file)==2)
-  eps_adapt = converted_adaptive_file[1][0]
-  n_adapt = converted_adaptive_file[1][1]
-  blen_adapt = converted_adaptive_file[1][2]
+  pop = converted_adaptive_file[1][0]
+  region = converted_adaptive_file[1][1]
+  eps_adapt = converted_adaptive_file[1][2]
+  n_adapt = converted_adaptive_file[1][3]
+  blen_adapt = converted_adaptive_file[1][4]
   assert((epsilon > 0) & (epsilon <= 1.0))
   n = R2_true.shape[0]
   mat = converted_adaptive_file[0][:n,:n]
@@ -154,5 +156,5 @@ def perf_adaptive(R2_true,converted_adaptive_file,epsilon):
   nonzero_r2_true = R2_x[R2_x > 0.0]
   nonzero_r2_adaptive = mat[mat > 0.0]
   corrcoef = corrcoef_PxP(R2_true,mat)
-  return (eps_adapt,n_adapt,blen_adapt,epsilon,np.sum(nonzero_r2_adaptive > epsilon),np.sum(nonzero_r2_true > epsilon),
+  return (pop,region,eps_adapt,n_adapt,blen_adapt,epsilon,np.sum(nonzero_r2_adaptive > epsilon),np.sum(nonzero_r2_true > epsilon),
             np.count_nonzero(nonzero_r2_adaptive),np.count_nonzero(nonzero_r2_true),corrcoef)
