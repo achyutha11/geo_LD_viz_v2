@@ -264,8 +264,8 @@ rule adaptive_k_single_pop_chrom_v2:
         snp_r2_adaptive = adaptive_ld_mat_snp_v2(gt_mat_filt, i,int(wildcards.EPS)/10000,int(wildcards.N))
         full_r2_list.append(snp_r2_adaptive)
       # Check the dimension of these arrays to make sure they are all 1-d
-      dims = np.array([x.ndim for x in full_r2_list])
-      assert(np.all(dims == 1))
+      #dims = np.array([x.ndim for x in full_r2_list])
+      #assert(np.all(dims == 1))
       variables = np.array([(str(wildcards.POP)),(str(wildcards.POS1)+"-"+str(wildcards.POS2)),(int(wildcards.EPS)/10000),(int(wildcards.N))])
       # Stack the array in a clever way
       adaptive_ld_mat, idxs = stack_ragged(full_r2_list)
@@ -275,7 +275,7 @@ rule adaptive_k_single_pop_chrom_v2:
         
 rule adaptive_ld_mats_v2:
     input:
-        expand('data/performance_tests/adaptive_v2_chr{CHROM}_eps{EPS}_N{N}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz', CHROM=22, AC=5, POP=['CEU'],POS1=17000000, POS2=20000000, EPS=[10,100,1000],N=[25,50])
+        expand('data/performance_tests/adaptive_v2_chr{CHROM}_eps{EPS}_N{N}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz', CHROM=22, AC=5, POP=['CEU'],POS1=17000000, POS2=20000000, EPS=[100],N=[50])
 
 eps_list = [10,100,1000]
 N_list = [25,50]
