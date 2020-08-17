@@ -295,13 +295,13 @@ rule snp_dist_csv:
     output:
       meta_csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_SNP_dist_chr{CHROM}_ac{AC,\d+}_meta.csv'
     run:
-      with open(output.csv,'w',newline='') as file:
+      with open(output.meta_csv,'w',newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['pop','region','eps','avg_dist'])
       for i in input.csv_list:
         eps_list = [0.1,0.01,0.001]
         for j in eps_list:
-            with open(output.csv,'a+',newline='') as file:
+            with open(output.meta_csv,'a+',newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow(avg_SNP_dist(i,j))
 
