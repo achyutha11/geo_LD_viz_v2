@@ -82,7 +82,8 @@ rule regional_full_LD_mat:
        # Creating full LD matrix
        ld_mat = np.corrcoef(a)**2
        ld_mat = ld_mat.astype('float16')
-       np.savez_compressed(output.ld_mat,ld_mat=ld_mat,snp_indices=snp_indices,pos=pos,alt_af=alt_af)
+       variables = np.array([(str(wildcards.POP)),(str(wildcards.POS1)+"-"+str(wildcards.POS2))])
+       np.savez_compressed(output.ld_mat,ld_mat=ld_mat,snp_indices=snp_indices,pos=pos,alt_af=alt_af,variables=variables)
 
 rule gen_full_LD_mat:
   input:
@@ -282,6 +283,32 @@ rule merge_regional_csv:
 rule meta_csv_gen:
     input:
         expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC}_meta.csv', CHROM=22, AC=5)
+        
+        
+rule snp_dist_csv:
+    """
+       Generate a meta csv file containing avg SNP distance to go below a certain epsilon threshold
+    """
+    input:
+      csv_list = expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/ld_mats_perf/chr{CHROM}_ac{AC}_full_LD_{pos}_pop{POP}.npz',
+                        CHROM=22,AC=5,POP=poplist, pos=poslist),
+    output:
+      meta_csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_SNP_dist_chr{CHROM}_ac{AC,\d+}_meta.csv'
+    run:
+      with open(output.csv,'w',newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['pop','region','eps','avg_dist'])
+      for i in input.csv_list:
+        eps_list = [0.1,0.01,0.001]
+        for j in eps_list:
+            with open(output.csv,'a+',newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(avg_SNP_dist(i,j))
+
+      
+rule snp_dist_csv_gen:
+    input:
+        expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_SNP_dist_chr{CHROM}_ac{AC}_meta.csv', CHROM=22, AC=5)
         
       
       
