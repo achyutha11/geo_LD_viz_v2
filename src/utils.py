@@ -89,3 +89,44 @@ def stack_ragged(array_list, axis=0):
     idx = np.cumsum(lengths[:-1])
     stacked = np.concatenate(array_list, axis=axis)
     return(stacked, idx)
+
+def avg_SNP_dist(full_mat_file,eps):
+    """
+    Method to find the average distance in SNPs for r2 to go below a certain epsilon threshold
+    """
+    
+    loadin = np.load(full_mat_file)
+    mat = loadin['ld_mat']
+    sample_mat = np.tril(mat)
+    
+    avg_list = []
+
+    for i in tqdm(range(sample_mat.shape[0])):
+        avg_list.append(np.mean(np.diag(sample_mat,-i)))
+    
+    for i in tqdm(range(len(avg_list))):
+        if avg_list[i] < eps:
+            return i
+            break
+
+def avg_std_SNP_dist(full_mat_file,eps):
+    """
+    Method to find the average distance in SNPs for r2 to go below a certain epsilon threshold, including std deviation
+    """
+    
+    loadin = np.load(full_mat_file)
+    mat = loadin['ld_mat']
+    sample_mat = np.tril(mat)
+    
+    avg_list = []
+    stdev_list = []
+
+    for i in tqdm(range(sample_mat.shape[0])):
+        avg_list.append(np.mean(np.diag(sample_mat,-i)))
+        stdev_list.append(np.std(np.diag(sample_mat,-i)))
+    
+    for i in tqdm(range(len(avg_list))):
+        if avg_list[i] - stdev_list[i] < eps:
+            return i
+            break
+            
