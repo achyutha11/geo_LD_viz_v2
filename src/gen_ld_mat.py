@@ -80,4 +80,32 @@ def adaptive_ld_mat_snp(gt, idx, eps=0.05, n=25, blen=100):
   else:
     r2_vec_tot = np.array(r2_vec_tot).flatten()
   return(r2_vec_tot)
+
+def adaptive_ld_mat_snp_v2(gt, idx, eps=0.01, n=50):
+  """
+  Function to generate LD-vector for a particular SNP
+  No blen parameter, instead goes one SNP at a time and calculates mean of last n entries
+  Arguments:
+     gt_mat = genotype matrix (nsnp x nindiv)
+     idx : snp index
+     eps : minimum of running mean
+     n: number of entries over which to calculate the running mean
+  """
+  nsnp, nindiv = gt.shape
+  assert(idx < nsnp)
+  focal_geno_vec = gt[idx,:]
+  x = idx + 1
+  r2_vec_tot = []
+  going = True
+  while going and x < nsnp:
+      r2_mat = np.corrcoef(focal_geno_vec, gt[x,:])
+      r2_vec = r2_mat[0,1]
+      r2_vec2 = r2_vec**2
+      r2_vec_tot.append(r2_vec2)
+      if len(r2_vec_tot) > n:
+          rec_mean = np.mean(r2_vec_tot[-n:]) 
+          if rec_mean <= eps:
+              going = False
+          x += 1
+  return(r2_vec_tot)
       
