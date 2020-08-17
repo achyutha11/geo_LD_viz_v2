@@ -91,13 +91,11 @@ def stack_ragged(array_list, axis=0):
     return(stacked, idx)
 
 def avg_SNP_dist(full_mat_file,eps):
-    """
-    Method to find the average distance in SNPs for r2 to go below a certain epsilon threshold
-    """
     
     loadin = np.load(full_mat_file)
     mat = loadin['ld_mat']
     sample_mat = np.tril(mat)
+    variables = loadin['variables']
     
     avg_list = []
 
@@ -105,8 +103,10 @@ def avg_SNP_dist(full_mat_file,eps):
         avg_list.append(np.mean(np.diag(sample_mat,-i)))
     
     for i in tqdm(range(len(avg_list))):
-        if avg_list[i] < eps:
-            return i
+        if np.all(avg_list[i] > eps):
+            answer = (variables[0],variables[1],eps,'Out of range')
+        elif avg_list[i] < eps:
+            answer = (variables[0],variables[1],eps,i)
             break
-
+    return answer
 
