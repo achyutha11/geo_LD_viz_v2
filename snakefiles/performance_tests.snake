@@ -277,7 +277,7 @@ rule adaptive_ld_mats_v2:
     input:
         expand('data/performance_tests/adaptive_v2_chr{CHROM}_eps{EPS}_N{N}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz', CHROM=22, AC=5, POP=['CEU'],POS1=17000000, POS2=20000000, EPS=[100],N=[25,50])
 
-eps_list = [10,100,1000]
+eps_list = [100]
 N_list = [25,50]
 blen_list = [100,250,500]
 chrom = 22
