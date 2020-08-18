@@ -158,3 +158,30 @@ def perf_adaptive(R2_true,converted_adaptive_file,epsilon):
   corrcoef = corrcoef_PxP(R2_true,mat)
   return (pop,region,eps_adapt,n_adapt,blen_adapt,epsilon,np.sum(nonzero_r2_adaptive > epsilon),np.sum(nonzero_r2_true > epsilon),
             np.count_nonzero(nonzero_r2_adaptive),np.count_nonzero(nonzero_r2_true),corrcoef)
+
+def perf_adaptive_v2(R2_true,converted_adaptive_file,epsilon):
+  
+  """
+    Testing the performance of an adaptive array against the full LD matrix (WITHOUT BLEN)
+    Arguments:
+    R2_true = n x n sample LD matrix
+    converted_adaptive_file = output of adaptive_file_convert on original adaptive file
+    epsilon = r2 threshold for performance testing
+  """
+  assert(len(converted_adaptive_file)==2)
+  pop = converted_adaptive_file[1][0]
+  region = converted_adaptive_file[1][1]
+  eps_adapt = converted_adaptive_file[1][2]
+  n_adapt = converted_adaptive_file[1][3]
+  assert((epsilon > 0) & (epsilon <= 1.0))
+  n = R2_true.shape[0]
+  mat = converted_adaptive_file[0][:n,:n]
+  m = mat.shape[0]
+  assert(n==m)
+  R2_x = np.tril(R2_true,k=-1)
+  nonzero_r2_true = R2_x[R2_x > 0.0]
+  nonzero_r2_adaptive = mat[mat > 0.0]
+  corrcoef = corrcoef_PxP(R2_true,mat)
+  return (pop,region,eps_adapt,n_adapt,epsilon,np.sum(nonzero_r2_adaptive > epsilon),np.sum(nonzero_r2_true > epsilon),
+            np.count_nonzero(nonzero_r2_adaptive),np.count_nonzero(nonzero_r2_true),corrcoef)
+
