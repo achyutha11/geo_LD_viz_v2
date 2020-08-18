@@ -106,6 +106,6 @@ def adaptive_ld_mat_snp_v2(gt, idx, eps=0.01, n=50):
           rec_mean = np.mean(r2_vec_tot[-n:]) 
           if rec_mean <= eps:
               going = False
-          x += 1
+      x += 1
   return(r2_vec_tot)
       
