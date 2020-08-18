@@ -352,7 +352,7 @@ rule adaptive_perf_csv_v2:
                 
 rule adaptive_csv_gen_v2:
     input:
-        expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_v2_perf_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.csv', CHROM=22, AC=5, POP='CEU',POS1=17000000, POS2=20000000, EPS=[10,100,1000],N=[25,50])
+        expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_v2_perf_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.csv', CHROM=22, AC=5, POP='CEU',POS1=17000000, POS2=20000000, EPS=[100],N=[25,50])
 
         
 rule merge_regional_csv:
