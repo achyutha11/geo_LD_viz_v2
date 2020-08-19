@@ -372,6 +372,23 @@ rule meta_csv_gen:
     input:
         expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_perf_chr{CHROM}_ac{AC}_meta.csv', CHROM=22, AC=5)
         
+rule merge_regional_csv_v2:
+    """
+       Generate a meta csv file containing all population data for a particular region of a chromosome 
+    """
+    input:
+      csv_list = expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_v2_perf_chr{CHROM}_ac{AC}_{pos}_pop{POP}.csv',
+                        CHROM=22,AC=5,POP=poplist, pos=poslist),
+    output:
+      meta_csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_v2_perf_chr{CHROM}_ac{AC,\d+}_meta.csv'
+    run:
+      merge_csv = pd.concat([pd.read_csv(i) for i in input.csv_list])
+      merge_csv.to_csv(output.meta_csv)
+      
+rule meta_csv_gen_v2:
+    input:
+        expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_v2_perf_chr{CHROM}_ac{AC}_meta.csv', CHROM=22, AC=5)
+        
         
 rule snp_dist_csv:
     """
