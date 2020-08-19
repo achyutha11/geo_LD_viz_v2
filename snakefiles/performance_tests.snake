@@ -416,52 +416,52 @@ rule snp_dist_csv_gen:
         expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_SNP_dist_chr{CHROM}_ac{AC}_meta.csv', CHROM=22, AC=5)
         
    
-rule mean_r2_values:
-    """
-        Generate list containing mean r2 values at each increment in SNP distance for a particular chromosome for a particular population
-    """
-    input:
-      vcf = rules.filt_biallelic_AC_1kg.output.vcf,
-      popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
-    output:
-      adaptive_ld_mat = 'data/performance_tests/adaptive_v2_mean_r2_chr{CHROM}_ac{AC,\d+}_pop{POP}.npz'    
-    run:
-      # Reading in vcf
-      callset = allel.read_vcf(input.vcf, fields=['variants/CHROM', 'calldata/GT','samples','variants/POS'])
-      # Generating genotype array
-      gt = allel.GenotypeArray(callset['calldata/GT'])
-      # Filtering out particular population
-      panel = pd.read_csv(input.popfile, sep='\t', usecols=['sample', 'pop', 'super_pop'])
-      pop_check = (panel['pop']==wildcards.POP)
-      pop_indices = panel[pop_check].index.values
-      pop_gt = gt.take(pop_indices, axis=1)
-      # Creating summed genotype matrix
-      gt_mat = pop_gt.to_n_alt()
-      _, nsamp = gt_mat.shape
-      
-      # Filter this to only the sites that are polymorphic
-      idx_polymorphic = ((alt_af > 0) & (alt_af < 1))
-      alt_af_filt = alt_af[idx_polymorphic]
-      gt_mat_filt = gt_mat[idx_polymorphic,:]
-      nsnps_filt, nsamp_filt = gt_mat_filt.shape
-      
-      # Empty list for arrays
-      full_r2_list = []
-      # Appending each array to list and saving
-      for i in tqdm(range(nsnps_filt)):
-        snp_r2_adaptive = adaptive_ld_mat_snp_v2(gt_mat_filt, i,int(wildcards.EPS)/10000,int(wildcards.N))
-        full_r2_list.append(snp_r2_adaptive)
-      # Check the dimension of these arrays to make sure they are all 1-d
-      #dims = np.array([x.ndim for x in full_r2_list])
-      #assert(np.all(dims == 1))
-      variables = np.array([(str(wildcards.POP)),(str(wildcards.POS1)+"-"+str(wildcards.POS2)),(int(wildcards.EPS)/10000),(int(wildcards.N))])
-      # Stack the array in a clever way
-      adaptive_ld_mat, idxs = stack_ragged(full_r2_list)
-      np.savez_compressed(output.adaptive_ld_mat,
-                          adaptive_ld_mat=adaptive_ld_mat, idx=idxs,
-                          chroms=chroms[idx_polymorphic], positions=positions[idx_polymorphic], alt_af = alt_af_filt, variables = variables)
-        
-        
-        
+#rule mean_r2_values:
+#    """
+#        Generate list containing mean r2 values at each increment in SNP distance for a particular chromosome for a particular population
+#    """
+#    input:
+#      vcf = rules.filt_biallelic_AC_1kg.output.vcf,
+#      popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
+#    output:
+#      adaptive_ld_mat = 'data/performance_tests/adaptive_v2_mean_r2_chr{CHROM}_ac{AC,\d+}_pop{POP}.npz'    
+#    run:
+#      # Reading in vcf
+#      callset = allel.read_vcf(input.vcf, fields=['variants/CHROM', 'calldata/GT','samples','variants/POS'])
+#      # Generating genotype array
+#      gt = allel.GenotypeArray(callset['calldata/GT'])
+#      # Filtering out particular population
+#      panel = pd.read_csv(input.popfile, sep='\t', usecols=['sample', 'pop', 'super_pop'])
+#      pop_check = (panel['pop']==wildcards.POP)
+#      pop_indices = panel[pop_check].index.values
+#      pop_gt = gt.take(pop_indices, axis=1)
+#      # Creating summed genotype matrix
+#      gt_mat = pop_gt.to_n_alt()
+#      _, nsamp = gt_mat.shape
+#      
+#      # Filter this to only the sites that are polymorphic
+#      idx_polymorphic = ((alt_af > 0) & (alt_af < 1))
+#      alt_af_filt = alt_af[idx_polymorphic]
+#      gt_mat_filt = gt_mat[idx_polymorphic,:]
+#      nsnps_filt, nsamp_filt = gt_mat_filt.shape
+#      
+#      # Empty list for arrays
+#      full_r2_list = []
+#      # Appending each array to list and saving
+#      for i in tqdm(range(nsnps_filt)):
+#        snp_r2_adaptive = adaptive_ld_mat_snp_v2(gt_mat_filt, i,int(wildcards.EPS)/10000,int(wildcards.N))
+#        full_r2_list.append(snp_r2_adaptive)
+#      # Check the dimension of these arrays to make sure they are all 1-d
+#      #dims = np.array([x.ndim for x in full_r2_list])
+#      #assert(np.all(dims == 1))
+#      variables = np.array([(str(wildcards.POP)),(str(wildcards.POS1)+"-"+str(wildcards.POS2)),(int(wildcards.EPS)/10000),(int(wildcards.N))])
+#      # Stack the array in a clever way
+#      adaptive_ld_mat, idxs = stack_ragged(full_r2_list)
+#      np.savez_compressed(output.adaptive_ld_mat,
+#                          adaptive_ld_mat=adaptive_ld_mat, idx=idxs,
+#                          chroms=chroms[idx_polymorphic], positions=positions[idx_polymorphic], alt_af = alt_af_filt, variables = variables)
+#        
+#        
+#        
       
       
