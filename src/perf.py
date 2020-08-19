@@ -185,3 +185,22 @@ def perf_adaptive_v2(R2_true,converted_adaptive_file,epsilon):
   return (pop,region,eps_adapt,n_adapt,epsilon,np.sum(nonzero_r2_adaptive > epsilon),np.sum(nonzero_r2_true > epsilon),
             np.count_nonzero(nonzero_r2_adaptive),np.count_nonzero(nonzero_r2_true),corrcoef)
 
+def n_finder(gt_mat, x, eps):
+  """
+  Find the number of SNPs from a focal SNP for the mean r2 value to go below a certain epsilon
+  Also the mean r2 at each SNP distance from a focal SNP
+  """
+  numsnps = int(0.95*gt_mat.shape[0])
+  assert(x < numsnps)
+  assert(eps > 0 and eps<= 1.0)
+  indices = np.random.choice(numsnps, size=x, replace=False)
+  n = 0
+  avg_list = []
+  going = True
+  while going:
+      r2_list = [np.corrcoef(gt_mat[i,:],gt_mat[i+n,:])[0,1]**2 for i in indices]
+      avg_list.append(np.mean(r2_list))
+      n += 1
+      if np.mean(r2_list) < eps:
+          going = False 
+  return n,avg_list
