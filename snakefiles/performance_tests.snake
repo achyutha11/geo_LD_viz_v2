@@ -438,6 +438,8 @@ rule mean_r2_values:
       # Creating summed genotype matrix
       gt_mat = pop_gt.to_n_alt()
       _, nsamp = gt_mat.shape
+      # Calculate alt AF
+      alt_af = np.sum(gt_mat, axis=1)/(2*nsamp)
       
       # Filter this to only the sites that are polymorphic
       idx_polymorphic = ((alt_af > 0) & (alt_af < 1))
