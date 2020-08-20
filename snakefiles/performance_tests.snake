@@ -447,7 +447,7 @@ rule mean_r2_values:
       gt_mat_filt = gt_mat[idx_polymorphic,:]
       nsnps_filt, nsamp_filt = gt_mat_filt.shape
       
-      r2_list = n_finder(gt_mat, wildcards.X, (wildcards.EPS/10000))[1]
+      r2_list = n_finder(gt_mat, wildcards.X, (int(wildcards.EPS)/10000))[1]
       r2_array = np.array(r2_list)
       np.savez_compressed(output.mean_r2, r2_array = r2_array)
         
