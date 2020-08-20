@@ -88,6 +88,5 @@
       "err": "log/{rule}-%j.err",
       "partition": "jnovembre",
       "ncores": "1"
-	}
-	
+	}	
 }
