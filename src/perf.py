@@ -195,11 +195,11 @@ def n_finder(gt_mat, x, eps):
   assert(eps > 0 and eps<= 1.0)
   indices = np.random.choice(numsnps, size=x, replace=False)
   n = 0
-  avg_list = []
+  avg_array = np.zeros(gt_mat.shape[0])
   going = True
   while going:
       r2_list = [np.corrcoef(gt_mat[i,:],gt_mat[i+n,:])[0,1]**2 for i in indices]
-      avg_list.append(np.mean(r2_list))
+      avg_array[n] = np.nanmean(r2_list))
       n += 1
       if np.mean(r2_list) < eps:
           going = False 
