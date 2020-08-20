@@ -424,7 +424,9 @@ rule mean_r2_values:
       vcf = rules.filt_biallelic_AC_1kg.output.vcf,
       popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
     output:
-      mean_r2 = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/mean_r2_x{X,\d+}_eps{EPS,\d+}_chr{CHROM}_ac{AC,\d+}_pop{POP}.npz'    
+      mean_r2 = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/mean_r2_x{X,\d+}_eps{EPS,\d+}_chr{CHROM}_ac{AC,\d+}_pop{POP}.npz' 
+    benchmark:
+      "benchmark/x{X,\d+}_eps{EPS,\d+}_{CHROM}_{AC,\d+}_{POP}.mean_r2.benchmark.txt"
     run:
       # Reading in vcf
       callset = allel.read_vcf(input.vcf, fields=['calldata/GT'])
