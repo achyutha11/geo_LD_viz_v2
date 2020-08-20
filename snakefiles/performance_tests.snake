@@ -282,8 +282,8 @@ N_list = [25,50]
 blen_list = [100,250,500]
 chrom = 22
 ac = 5
-pos1 = 33000000
-pos2 = 36000000
+pos1 = 41000000
+pos2 = 44000000
 pop = 'CEU'
 poslist = ['pos17000000_20000000','pos25000000_28000000','pos33000000_36000000','pos41000000_44000000','pos48000000_51000000']
 poplist = ['CEU','CHB','YRI','FIN','MXL','ASW']
@@ -329,7 +329,7 @@ rule adaptive_perf_csv_v2:
     """
     input:
       adaptive = expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_v2_chr{CHROM}_eps{EPS}_N{N}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz',
-                        CHROM=22,EPS=eps_list,N=N_list,AC=5,POS1=33000000,POS2=36000000,POP='CEU'),
+                        CHROM=22,EPS=eps_list,N=N_list,AC=5,POS1=41000000,POS2=44000000,POP='CEU'),
       full = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/ld_mats_perf/chr'+str(chrom)+'_ac'+str(ac)+'_full_LD_pos'+str(pos1)+'_'+str(pos2)+'_pop'+str(pop)+'.npz'
     output:
       csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_v2_perf_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.csv'
@@ -352,7 +352,7 @@ rule adaptive_perf_csv_v2:
                 
 rule adaptive_csv_gen_v2:
     input:
-        expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_v2_perf_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.csv', CHROM=22, AC=5, POP='CEU',POS1=33000000, POS2=36000000, EPS=[50,100],N=[25,50])
+        expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_v2_perf_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.csv', CHROM=22, AC=5, POP='CEU',POS1=41000000, POS2=44000000, EPS=[50,100],N=[25,50])
 
         
 rule merge_regional_csv:
@@ -416,37 +416,38 @@ rule snp_dist_csv_gen:
         expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_SNP_dist_chr{CHROM}_ac{AC}_meta.csv', CHROM=22, AC=5)
         
    
-#rule mean_r2_values:
-#    """
-#        Generate list containing mean r2 values at each increment in SNP distance for a particular chromosome for a particular population
-#    """
-#    input:
-#      vcf = rules.filt_biallelic_AC_1kg.output.vcf,
-#      popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
-#    output:
-#      adaptive_ld_mat = 'data/performance_tests/adaptive_v2_mean_r2_chr{CHROM}_ac{AC,\d+}_pop{POP}.npz'    
-#    run:
-#      # Reading in vcf
-#      callset = allel.read_vcf(input.vcf, fields=['variants/CHROM', 'calldata/GT','samples','variants/POS'])
-#      # Generating genotype array
-#      gt = allel.GenotypeArray(callset['calldata/GT'])
-#      # Filtering out particular population
-#      panel = pd.read_csv(input.popfile, sep='\t', usecols=['sample', 'pop', 'super_pop'])
-#      pop_check = (panel['pop']==wildcards.POP)
-#      pop_indices = panel[pop_check].index.values
-#      pop_gt = gt.take(pop_indices, axis=1)
-#      # Creating summed genotype matrix
-#      gt_mat = pop_gt.to_n_alt()
-#      _, nsamp = gt_mat.shape
-#      
-#      # Filter this to only the sites that are polymorphic
-#      idx_polymorphic = ((alt_af > 0) & (alt_af < 1))
-#      alt_af_filt = alt_af[idx_polymorphic]
-#      gt_mat_filt = gt_mat[idx_polymorphic,:]
-#      nsnps_filt, nsamp_filt = gt_mat_filt.shape
-#      
-#      r2_list = n_finder(gt_mat, wildcards.X, wildcards.EPS)[1]
-#      
-#        
+rule mean_r2_values:
+    """
+        Generate list containing mean r2 values at each increment in SNP distance for a particular chromosome for a particular population
+    """
+    input:
+      vcf = rules.filt_biallelic_AC_1kg.output.vcf,
+      popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
+    output:
+      mean_r2 = 'data/performance_tests/adaptive_v2_mean_r2_chr{CHROM}_ac{AC,\d+}_pop{POP}.npz'    
+    run:
+      # Reading in vcf
+      callset = allel.read_vcf(input.vcf, fields=['variants/CHROM', 'calldata/GT','samples','variants/POS'])
+      # Generating genotype array
+      gt = allel.GenotypeArray(callset['calldata/GT'])
+      # Filtering out particular population
+      panel = pd.read_csv(input.popfile, sep='\t', usecols=['sample', 'pop', 'super_pop'])
+      pop_check = (panel['pop']==wildcards.POP)
+      pop_indices = panel[pop_check].index.values
+      pop_gt = gt.take(pop_indices, axis=1)
+      # Creating summed genotype matrix
+      gt_mat = pop_gt.to_n_alt()
+      _, nsamp = gt_mat.shape
+      
+      # Filter this to only the sites that are polymorphic
+      idx_polymorphic = ((alt_af > 0) & (alt_af < 1))
+      alt_af_filt = alt_af[idx_polymorphic]
+      gt_mat_filt = gt_mat[idx_polymorphic,:]
+      nsnps_filt, nsamp_filt = gt_mat_filt.shape
+      
+      r2_list = n_finder(gt_mat, wildcards.X, wildcards.EPS)[1]
+      r2_array = np.array(r2_list)
+      np.savez_compressed(output.mean_r2, r2_array = r2_array)
+        
       
       
