@@ -427,7 +427,7 @@ rule mean_r2_values:
       mean_r2 = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/mean_r2_x{X,\d+}_eps{EPS,\d+}_chr{CHROM}_ac{AC,\d+}_pop{POP}.npz'    
     run:
       # Reading in vcf
-      callset = allel.read_vcf(input.vcf, fields=['variants/CHROM', 'calldata/GT','samples','variants/POS'])
+      callset = allel.read_vcf(input.vcf, fields=['calldata/GT'])
       # Generating genotype array
       gt = allel.GenotypeArray(callset['calldata/GT'])
       # Filtering out particular population
@@ -447,7 +447,7 @@ rule mean_r2_values:
       gt_mat_filt = gt_mat[idx_polymorphic,:]
       nsnps_filt, nsamp_filt = gt_mat_filt.shape
       
-      r2_list = n_finder(gt_mat, int(wildcards.X), (int(wildcards.EPS)/10000))[1]
+      r2_list = n_finder(gt_mat_filt, int(wildcards.X), (int(wildcards.EPS)/10000))[1]
       r2_array = np.array(r2_list)
       np.savez_compressed(output.mean_r2, r2_array = r2_array)
         
