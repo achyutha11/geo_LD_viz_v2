@@ -203,4 +203,4 @@ def n_finder(gt_mat, x, eps):
       n += 1
       if np.mean(r2_list) < eps:
           going = False 
-  return n,avg_array[:n+1]
+  return n,avg_array[:n]
