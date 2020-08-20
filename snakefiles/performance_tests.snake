@@ -445,23 +445,8 @@ rule snp_dist_csv_gen:
 #      gt_mat_filt = gt_mat[idx_polymorphic,:]
 #      nsnps_filt, nsamp_filt = gt_mat_filt.shape
 #      
-#      # Empty list for arrays
-#      full_r2_list = []
-#      # Appending each array to list and saving
-#      for i in tqdm(range(nsnps_filt)):
-#        snp_r2_adaptive = adaptive_ld_mat_snp_v2(gt_mat_filt, i,int(wildcards.EPS)/10000,int(wildcards.N))
-#        full_r2_list.append(snp_r2_adaptive)
-#      # Check the dimension of these arrays to make sure they are all 1-d
-#      #dims = np.array([x.ndim for x in full_r2_list])
-#      #assert(np.all(dims == 1))
-#      variables = np.array([(str(wildcards.POP)),(str(wildcards.POS1)+"-"+str(wildcards.POS2)),(int(wildcards.EPS)/10000),(int(wildcards.N))])
-#      # Stack the array in a clever way
-#      adaptive_ld_mat, idxs = stack_ragged(full_r2_list)
-#      np.savez_compressed(output.adaptive_ld_mat,
-#                          adaptive_ld_mat=adaptive_ld_mat, idx=idxs,
-#                          chroms=chroms[idx_polymorphic], positions=positions[idx_polymorphic], alt_af = alt_af_filt, variables = variables)
-#        
-#        
+#      r2_list = n_finder(gt_mat, wildcards.X, wildcards.EPS)[1]
+#      
 #        
       
       
