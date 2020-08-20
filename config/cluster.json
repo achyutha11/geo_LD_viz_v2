@@ -79,6 +79,15 @@
       "err": "log/{rule}-%j.err",
       "partition": "jnovembre",
       "ncores": "1"
+	},
+	"mean_r2_values":
+	{
+      "time" : "12:00:00",
+      "mem": "40G",
+      "out": "log/{rule}-%j.out",
+      "err": "log/{rule}-%j.err",
+      "partition": "jnovembre",
+      "ncores": "1"
 	}
 	
 }
