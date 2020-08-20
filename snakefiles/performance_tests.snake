@@ -453,4 +453,4 @@ rule mean_r2_values:
         
 rule mean_r2_values_gen:
     input:
-        expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/mean_r2_x{X}_eps{EPS}_chr{CHROM}_ac{AC}_pop{POP}.npz', CHROM=22, AC=5, POP='CEU',EPS=[1000],X=10000)
+        expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/mean_r2_x{X}_eps{EPS}_chr{CHROM}_ac{AC}_pop{POP}.npz', CHROM=22, AC=5, POP=poplist,EPS=[1000,100,10],X=10000)
