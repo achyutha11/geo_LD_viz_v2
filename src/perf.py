@@ -190,7 +190,7 @@ def n_finder(gt_mat, x, eps):
   Find the number of SNPs from a focal SNP for the mean r2 value to go below a certain epsilon
   Also the mean r2 at each SNP distance from a focal SNP
   """
-  numsnps = int(0.95*gt_mat.shape[0])
+  numsnps = int(0.9*gt_mat.shape[0])
   assert(x < numsnps)
   assert(eps > 0 and eps<= 1.0)
   indices = np.random.choice(numsnps, size=x, replace=False)
