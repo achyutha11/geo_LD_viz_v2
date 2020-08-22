@@ -456,3 +456,46 @@ rule mean_r2_values:
 rule mean_r2_values_gen:
     input:
         expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/mean_r2_x{X}_eps{EPS}_chr{CHROM}_ac{AC}_pop{POP}.npz', CHROM=22, AC=5, POP=poplist,EPS=[1000,500],X=10000)
+        
+        
+rule mean_r2_values_v2:
+    """
+        Generate list containing mean r2 values at each increment in SNP distance for a particular chromosome for a particular population
+        Uses second n-finder function that takes different sample of SNPs in each iteration
+    """
+    input:
+      vcf = rules.filt_biallelic_AC_1kg.output.vcf,
+      popfile = VCF_1KG_DIR + 'integrated_call_samples_v3.20130502.ALL.panel'
+    output:
+      mean_r2 = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/mean_r2_v2_x{X,\d+}_eps{EPS,\d+}_chr{CHROM}_ac{AC,\d+}_pop{POP}.npz' 
+    benchmark:
+      "benchmark/x{X,\d+}_eps{EPS,\d+}_{CHROM}_{AC,\d+}_{POP}.mean_r2_v2.benchmark.txt"
+    run:
+      # Reading in vcf
+      callset = allel.read_vcf(input.vcf, fields=['calldata/GT'])
+      # Generating genotype array
+      gt = allel.GenotypeArray(callset['calldata/GT'])
+      # Filtering out particular population
+      panel = pd.read_csv(input.popfile, sep='\t', usecols=['sample', 'pop', 'super_pop'])
+      pop_check = (panel['pop']==wildcards.POP)
+      pop_indices = panel[pop_check].index.values
+      pop_gt = gt.take(pop_indices, axis=1)
+      # Creating summed genotype matrix
+      gt_mat = pop_gt.to_n_alt()
+      _, nsamp = gt_mat.shape
+      # Calculate alt AF
+      alt_af = np.sum(gt_mat, axis=1)/(2*nsamp)
+      
+      # Filter this to only the sites that are polymorphic
+      idx_polymorphic = ((alt_af > 0) & (alt_af < 1))
+      alt_af_filt = alt_af[idx_polymorphic]
+      gt_mat_filt = gt_mat[idx_polymorphic,:]
+      nsnps_filt, nsamp_filt = gt_mat_filt.shape
+      
+      r2_list = n_finder_v2(gt_mat_filt, int(wildcards.X), (int(wildcards.EPS)/10000))[1]
+      r2_array = np.array(r2_list)
+      np.savez_compressed(output.mean_r2, r2_array = r2_array)
+        
+rule mean_r2_values_gen_v2:
+    input:
+        expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/mean_r2_v2_x{X}_eps{EPS}_chr{CHROM}_ac{AC}_pop{POP}.npz', CHROM=22, AC=5, POP=poplist,EPS=[1000,500],X=10000)
