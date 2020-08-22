@@ -204,3 +204,24 @@ def n_finder(gt_mat, x, eps):
       if np.mean(r2_list) < eps:
           going = False 
   return n,avg_array[:n]
+
+def n_finder_v2(gt_mat, x, eps):
+  """
+  Find the number of SNPs from a focal SNP for the mean r2 value to go below a certain epsilon
+  Also the mean r2 at each SNP distance from a focal SNP
+  Generates new set of indices each time
+  """
+  numsnps = int(0.9*gt_mat.shape[0])
+  assert(x < numsnps)
+  assert(eps > 0 and eps<= 1.0)
+  n = 0
+  avg_array = np.zeros(gt_mat.shape[0])
+  going = True
+  while going:
+      indices = np.random.choice(numsnps, size=x, replace=False)
+      r2_list = [np.corrcoef(gt_mat[i,:],gt_mat[i+n,:])[0,1]**2 for i in indices]
+      avg_array[n] = np.nanmean(r2_list)
+      n += 1
+      if np.mean(r2_list) < eps:
+          going = False 
+  return n,avg_array[:n]
