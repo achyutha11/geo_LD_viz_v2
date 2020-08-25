@@ -275,7 +275,7 @@ rule adaptive_k_single_pop_chrom_v2:
                 
 rule adaptive_ld_mats_v2:
     input:
-        expand('data/performance_tests/adaptive_v2_chr{CHROM}_eps{EPS}_N{N}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz', CHROM=22, AC=5, POP='FIN',POS1=33000000, POS2=36000000, EPS=[500],N=[125,250])
+        expand('data/performance_tests/adaptive_v2_chr{CHROM}_eps{EPS}_N{N}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz', CHROM=22, AC=5, POP='FIN',POS1=41000000, POS2=44000000, EPS=[500],N=[125,250])
 
 eps_list = [50,100,500]
 N_list = [25,50]
