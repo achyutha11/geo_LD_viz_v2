@@ -129,7 +129,7 @@ def corrcoef_PxP(R2_true, R2_inf):
   r2_true = R2_true[x_tril, y_tril]
   r2_inf = R2_inf[x_tril, y_tril]
   # compute the correlation coefficient to return
-  r = np.corrcoef(r2_true, r2_inf)[0,1]
+  r = np.ma.corrcoef(r2_true, r2_inf)[0,1]
   return(r)
 
 def perf_adaptive(R2_true,converted_adaptive_file,epsilon):
