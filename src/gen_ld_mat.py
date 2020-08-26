@@ -65,7 +65,7 @@ def adaptive_ld_mat_snp(gt, idx, eps=0.05, n=25, blen=100):
   r2_vec_tot = []
   going = True
   while going and x < nsnp:
-    r2_mat = np.corrcoef(focal_geno_vec, gt[x:(x+blen),:])
+    r2_mat = np.ma.corrcoef(focal_geno_vec, gt[x:(x+blen),:])
     r2_vec = r2_mat[0,1:]
     r2_vec2 = r2_vec**2
     cur_mean_r2 = running_mean(r2_vec2, n)
