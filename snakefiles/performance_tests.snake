@@ -219,7 +219,7 @@ rule adaptive_k_single_pop_chrom:
         
 rule adaptive_ld_mats:
     input:
-        expand('data/performance_tests/adaptive_chr{CHROM}_eps{EPS}_N{N}_blen{BLEN}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz', CHROM=22, AC=5, POP=['ASW'],POS1=17000000, POS2=20000000, EPS=[1000],N=[25],BLEN=[100])
+        expand('data/performance_tests/adaptive_chr{CHROM}_eps{EPS}_N{N}_blen{BLEN}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz', CHROM=22, AC=5, POP=['ASW'],POS1=17000000, POS2=20000000, EPS=[10,100,1000],N=[25,50],BLEN=[100,250,500])
         
      
 rule adaptive_k_single_pop_chrom_v2:
