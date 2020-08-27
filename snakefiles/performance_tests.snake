@@ -282,9 +282,9 @@ N_list = [25,50]
 blen_list = [100,250,500]
 chrom = 22
 ac = 5
-pos1 = 17000000
-pos2 = 20000000
-pop = 'ASW'
+pos1 = 33000000
+pos2 = 36000000
+pop = 'MXL'
 poslist = ['pos17000000_20000000','pos25000000_28000000','pos33000000_36000000','pos41000000_44000000','pos48000000_51000000']
 poplist = ['CEU','CHB','YRI','FIN','MXL','ASW']
         
@@ -328,7 +328,7 @@ rule adaptive_perf_csv_v2:
     """
     input:
       adaptive = expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_v2_chr{CHROM}_eps{EPS}_N{N}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.npz',
-                        CHROM=22,EPS=[100],N=[25],AC=5,POS1=17000000,POS2=20000000,POP='ASW'),
+                        CHROM=22,EPS=[100],N=[25],AC=5,POS1=33000000,POS2=36000000,POP='MXL'),
       full = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/ld_mats_perf/chr'+str(chrom)+'_ac'+str(ac)+'_full_LD_pos'+str(pos1)+'_'+str(pos2)+'_pop'+str(pop)+'.npz'
     output:
       csv = '/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_v2_perf_chr{CHROM}_ac{AC,\d+}_pos{POS1,\d+}_{POS2,\d+}_pop{POP}.csv'
@@ -351,7 +351,7 @@ rule adaptive_perf_csv_v2:
                 
 rule adaptive_csv_gen_v2:
     input:
-        expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_v2_perf_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.csv', CHROM=22, AC=5, POP='ASW',POS1=17000000, POS2=20000000, EPS=[100],N=[25])
+        expand('/project2/jnovembre/achyutha11/geo_LD_viz_v2/data/performance_tests/adaptive_v2_perf_chr{CHROM}_ac{AC}_pos{POS1}_{POS2}_pop{POP}.csv', CHROM=22, AC=5, POP='MXL',POS1=33000000, POS2=36000000, EPS=[100],N=[25])
 
 
 rule adaptive_perf_csv_emp:
