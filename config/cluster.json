@@ -59,7 +59,7 @@
       "mem": "40G",
       "out": "log/{rule}-%j.out",
       "err": "log/{rule}-%j.err",
-      "partition": "broadwl",
+      "partition": "jnovembre",
       "ncores": "1"
 	},
 	"adaptive_k_single_pop_chrom_v2":
@@ -68,7 +68,7 @@
       "mem": "40G",
       "out": "log/{rule}-%j.out",
       "err": "log/{rule}-%j.err",
-      "partition": "jnovembre",
+      "partition": "broadwl",
       "ncores": "1"
 	},
 	"adaptive_perf_csv_v2":
