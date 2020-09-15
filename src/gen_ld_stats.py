@@ -45,3 +45,61 @@ def ld_score_all_pos(geno_mat, pos, win_size=1e6):
   for i in tqdm(range(nsnps)):
     ld_scores[i] = ld_score_snp_pos(geno_mat, pos, idx=i, win_size=win_size)
   return(ld_scores)
+
+
+# -------- Statistics on adaptive-K arrays --------- #
+
+def ld_score_adaptive(npz_file,snp_pos):
+    """
+    Function to take in particular adaptive file and SNP position and return LD score for that SNP.
+    
+    Arguments:
+    npz_file : Saved compressed file containing adaptive arrays
+    snp_pos : Particular position on chromosome, for which LD score is to be calculated    
+    """
+    
+    # Load in adaptive array
+    loader = np.load(npz_file)
+    adaptive_array = loader['adaptive_ld_mat']
+    
+    # Split up array into array of arrays, based on idx
+    idxs = loader['idx']
+    idxs = np.insert(idxs,0,0)
+    array_list = []
+    
+    for i in list(range(idxs.size-1)):
+        array_list.append(adaptive_array[idxs[i]:idxs[i+1]])
+    
+    # Find SNP corresponding to position entered
+    positions = loader['positions']
+    
+    if any(j==snp_pos for i,j in enumerate(positions)):
+        for i,j in enumerate(positions):
+            if j==snp_pos:
+                index = i
+    else:
+        return 'Invalid position'
+        
+    # Calculate forward
+    forward_ld = sum(array_list[index])
+    
+    # Calculate backward
+    backward_ld = []
+    counter = 0
+    
+    reverse_list = list(range(index))
+    
+    reverse_list.reverse()
+    
+    for i in reverse_list:     
+        counter+=1      
+        if array_list[i].shape[0] <= counter:
+            continue
+        else:
+            backward_ld.append(array_list[i][counter])
+        
+    backward_sum = sum(backward_ld)
+    
+    # Total sum, return statement
+    total_ld_score = backward_sum + forward_ld
+    return total_ld_score
