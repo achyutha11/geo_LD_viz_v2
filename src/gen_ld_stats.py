@@ -36,8 +36,8 @@ def ld_score_all_pos(geno_mat, pos, win_size=1e6):
   """
     Compute the LD-Score for all SNPs within a given window
     Args:
-      geno_mat : an N x P matrix where entries are the 
-      pos: 
+      geno_mat : an N x P matrix where entries are the actual genotypes (0/1 or 0/1/2)
+      pos: a P-length vector 
   """
   n, nsnps = geno_mat.shape
   assert(pos.size == nsnps)
@@ -48,8 +48,7 @@ def ld_score_all_pos(geno_mat, pos, win_size=1e6):
 
 
 # -------- Statistics on adaptive-K arrays --------- #
-
-def ld_score_adaptive(npz_file,snp_pos):
+def ld_score_adaptive(npz_file, pos, idx, win_size=1e6):
     """
     Function to take in particular adaptive file and SNP position and return LD score for that SNP.
     
@@ -67,7 +66,7 @@ def ld_score_adaptive(npz_file,snp_pos):
     idxs = np.insert(idxs,0,0)
     array_list = []
     
-    for i in list(range(idxs.size-1)):
+    for i in range(idxs.size-1):
         array_list.append(adaptive_array[idxs[i]:idxs[i+1]])
     
     # Find SNP corresponding to position entered
@@ -103,3 +102,22 @@ def ld_score_adaptive(npz_file,snp_pos):
     # Total sum, return statement
     total_ld_score = backward_sum + forward_ld
     return total_ld_score
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+# ------- XXX ------ #  
+
+
+
+
+
+
+
+
