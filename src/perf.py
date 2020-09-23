@@ -225,3 +225,12 @@ def n_finder_v2(gt_mat, x, eps):
       if np.mean(r2_list) < eps:
           going = False 
   return n,avg_array[:n]
+
+
+def rmse_calc(arr1, arr2):
+   """
+   Function takes in 2 LD score arrays and returns the root mean squared error (RMSE) between arrays
+   """
+   assert arr1.shape==arr2.shape
+   
+   return np.sqrt(np.mean((arr2-arr1)**2))
