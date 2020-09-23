@@ -97,5 +97,14 @@
       "err": "log/{rule}-%j.err",
       "partition": "jnovembre",
       "ncores": "1"
+	},
+	"adaptive_k_single_pop_chrom_v2_FULL":
+	{
+      "time" : "12:00:00",
+      "mem": "40G",
+      "out": "log/{rule}-%j.out",
+      "err": "log/{rule}-%j.err",
+      "partition": "jnovembre",
+      "ncores": "1"
 	}
 }
