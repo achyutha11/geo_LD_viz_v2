@@ -331,7 +331,7 @@ rule adaptive_k_single_pop_chrom_v2_FULL:
                 
 rule adaptive_ld_mats_v2_FULL:
     input:
-        expand('data/performance_tests/adaptive_v2_full_chr{CHROM}_eps{EPS}_N{N}_ac{AC}_pop{POP}.npz', CHROM=22, AC=5, POP=['CEU'], EPS=[100],N=[25])
+        expand('data/performance_tests/adaptive_v2_full_chr{CHROM}_eps{EPS}_N{N}_ac{AC}_pop{POP}.npz', CHROM=22, AC=5, POP=['CEU'], EPS=[100,50],N=[25])
         
         
 eps_list = [10,100,1000]
