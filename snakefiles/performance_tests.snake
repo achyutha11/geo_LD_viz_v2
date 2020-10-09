@@ -381,7 +381,7 @@ rule ld_score_pop_chrom_v2_FULL:
       gt_mat_filt = gt_mat[idx_polymorphic,:]
       nsnps_filt, nsamp_filt = gt_mat_filt.shape
       
-      ld_score_array = ld_score_all_pos(gt_mat_filt, positions[idx_polymorphic])
+      ld_score_array = ld_score_all_pos(gt_mat_filt.transpose(), positions[idx_polymorphic])
       np.savez_compressed(output.ld_score_array,
                           ld_score_array=ld_score_array,
                           chroms=chroms[idx_polymorphic], positions=positions[idx_polymorphic], alt_af = alt_af_filt)
