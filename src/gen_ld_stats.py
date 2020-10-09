@@ -39,7 +39,7 @@ def ld_score_all_pos(geno_mat, pos, win_size=1e6):
       geno_mat : an N x P matrix where entries are the 
       pos: 
   """
-  n, nsnps = geno_mat.shape
+  nsnps, n = geno_mat.shape
   assert(pos.size == nsnps)
   ld_scores = np.zeros(nsnps)
   for i in tqdm(range(nsnps)):
