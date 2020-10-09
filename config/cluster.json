@@ -106,5 +106,14 @@
       "err": "log/{rule}-%j.err",
       "partition": "jnovembre",
       "ncores": "1"
+	},
+	"ld_score_pop_chrom_v2_FULL":
+	{
+      "time" : "12:00:00",
+      "mem": "30G",
+      "out": "log/{rule}-%j.out",
+      "err": "log/{rule}-%j.err",
+      "partition": "jnovembre",
+      "ncores": "1"
 	}
 }
