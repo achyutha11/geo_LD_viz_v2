@@ -16,6 +16,7 @@ import sys
 sys.path.append('src/')
 from scipy.spatial.distance import squareform
 from gen_ld_mat import *
+from gen_ld_stats import *
 from utils import *
 from perf import *
 
