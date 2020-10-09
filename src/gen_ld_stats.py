@@ -17,7 +17,7 @@ def ld_score_snp_pos(geno_mat, pos, idx, win_size=1e6):
       pos : P-length vector 
       idx : integer for snp index
   """
-  nsnps, n = geno_mat.shape
+  n, nsnps = geno_mat.shape
   assert(pos.size == nsnps)
   focal_pos = pos[idx]
   # Get the range of positions 
@@ -39,7 +39,7 @@ def ld_score_all_pos(geno_mat, pos, win_size=1e6):
       geno_mat : an N x P matrix where entries are the 
       pos: 
   """
-  nsnps, n = geno_mat.shape
+  n, nsnps = geno_mat.shape
   assert(pos.size == nsnps)
   ld_scores = np.zeros(nsnps)
   for i in tqdm(range(nsnps)):
