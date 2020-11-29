@@ -11,7 +11,7 @@ import cartopy.feature as cf
 
 def cartopy_plot(values, coordinates):
     """
-    Plot LD statistics on a global map
+    Plot LD statistics on a global map (projection: equirectangular)
     
     Inputs:
         values: LD-statistic to be compared
@@ -20,5 +20,7 @@ def cartopy_plot(values, coordinates):
     Output:
         plot: Plot with specified values at required points on global map
     """
+    
+    
     
     
