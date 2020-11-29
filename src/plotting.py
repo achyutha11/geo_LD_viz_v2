@@ -16,9 +16,13 @@ def cartopy_plot(values, coordinates, map_color=False, title, marker='o', marker
     Inputs:
         values: LD-statistic to be compared
         coordinates: List of tuples of latitude and longitude
+        map_color: (boolean) True if map with color is preferred
+        title: (str)
+        marker: (str) Defines type of marker used on map
+        marker_color: (str)
         
     Output:
-        plot: Plot with specified values at required points on global map
+        plot: Matplotlib plot with specified values at specified points on global map
     """
     assert len(values) == len(coordinates)
     
@@ -29,7 +33,11 @@ def cartopy_plot(values, coordinates, map_color=False, title, marker='o', marker
     plt.title(title)
     
     for index, lat_long in enumerate(coordinates):
-        plt.plot(lat_long[0], lat_long[1], markersize=(10*values[index]),marker=marker,color=marker_color)
+        plt.plot(lat_long[0], lat_long[1], markersize=(10*values[index]), marker=marker, color=marker_color)
+        
+        
+
+        
     
     
     
